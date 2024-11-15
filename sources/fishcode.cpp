@@ -35,7 +35,7 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
   if (argv.size() == 2) {
     // One-word subcommand.
     // Check subcommand.
-    if (argv[1] == L"--copyright") {
+    if (argv[1] == CMD_COPYRIGHT) {
       // Print copyright information.
       std::cout <<
         "FishCode (fishcode) is a program for encrypting and decrypting files.\n"
@@ -43,10 +43,10 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
         "This program comes with ABSOLUTELY NO WARRANTY.\n"
         "This is free software, and you are welcome to redistribute it\n"
         "under certain conditions.\n";
-    } else if (argv[1] == L"--help") {
+    } else if (argv[1] == CMD_HELP) {
       // Print user manual.
       std::cout << USER_MANUAL << '\n';
-    } else if (argv[1] == L"--version") {
+    } else if (argv[1] == CMD_VERSION) {
       // Print program version.
       std::cout << "FishCode (fishcode) v1.0\n";
     } else {
@@ -56,7 +56,7 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
   } else if (argv.size() == 5) {
     // Subcommand with parameters.
     // Check subcommand.
-    if (argv[1] == L"--encrypt" || argv[1] == L"--decrypt") {
+    if (argv[1] == CMD_ENCRYPT || argv[1] == CMD_DECRYPT) {
       // Create output file.
       OutputFile outputFile(argv[3]);
 
@@ -64,7 +64,7 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
       const Password password(argv[4]);      
 
       // Do the task.
-      if (argv[1] == L"--encrypt") {
+      if (argv[1] == CMD_ENCRYPT) {
         // Encrypt the file.
         // Open the input file.
         InputFile inputFile(argv[2], false);

@@ -52,6 +52,20 @@ namespace fc {
     "\t1. ASCII-only printable characters;\n"
     "\t2. at least 8 symbols, maximum 16 symbols;\n"
     "\t3. no spaces.";
+  
+#if defined(_WIN32) || defined(_WIN64)
+  constexpr const auto CMD_COPYRIGHT = L"--copyright";
+  constexpr const auto CMD_HELP = L"--help";
+  constexpr const auto CMD_VERSION = L"--version";
+  constexpr const auto CMD_ENCRYPT = L"--encrypt";
+  constexpr const auto CMD_DECRYPT = L"--decrypt";
+#else
+  constexpr const auto CMD_COPYRIGHT = "--copyright";
+  constexpr const auto CMD_HELP = "--help";
+  constexpr const auto CMD_VERSION = "--version";
+  constexpr const auto CMD_ENCRYPT = "--encrypt";
+  constexpr const auto CMD_DECRYPT = "--decrypt";
+#endif // UTF-16 or UTF-8 commands.
 
   // Program-own main function.
   int Main(const std::vector<fc::string_t>& argv);
