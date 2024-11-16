@@ -1,5 +1,5 @@
-# This project requires CMake v3.12 or higher.
-cmake_minimum_required(VERSION 3.12)
+# This project requires CMake v3.20 or higher.
+cmake_minimum_required(VERSION 3.20)
 
 # It is C++ project.
 project(FishCode CXX)
