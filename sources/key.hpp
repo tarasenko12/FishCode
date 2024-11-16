@@ -69,3 +69,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_KEY_HPP
+

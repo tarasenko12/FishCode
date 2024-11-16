@@ -151,3 +151,4 @@ void fc::OutputFile::WriteKey(const Key& key) {
     stream.put(byte);
   }
 }
+

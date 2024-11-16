@@ -69,3 +69,4 @@ int fc::InvalidSubcommandError::GetErrorCode() const noexcept {
   // Return corresponding error code.
   return Results::INVALID_SUBCOMMAND;
 }
+

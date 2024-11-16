@@ -61,3 +61,4 @@ try {
   // Return error code.
   return fc::Results::SYSTEM_EXCEPTION;
 }
+

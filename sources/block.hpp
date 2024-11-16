@@ -51,3 +51,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_BLOCK_HPP
+

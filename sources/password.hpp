@@ -35,3 +35,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_PASSWORD_HPP
+

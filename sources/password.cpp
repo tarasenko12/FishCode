@@ -58,3 +58,4 @@ fc::Password::Password(const fc::string_t& passwordString) {
     }
   }
 }
+

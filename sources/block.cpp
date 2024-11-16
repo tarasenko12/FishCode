@@ -80,3 +80,4 @@ void fc::Block::Decrypt(const fc::Key& key) noexcept {
     bytes[index] = temp;
   }
 }
+

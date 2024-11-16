@@ -56,3 +56,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_FILE_HPP
+

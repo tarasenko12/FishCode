@@ -61,3 +61,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_ERROR_HPP
+

@@ -184,3 +184,4 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
   // Return error code.
   return Results::SYSTEM_EXCEPTION;
 }
+

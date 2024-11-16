@@ -33,3 +33,4 @@ namespace fc {
 }
 
 #endif // FISHCODE_STRING_HPP
+

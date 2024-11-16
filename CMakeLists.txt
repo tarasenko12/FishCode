@@ -32,3 +32,4 @@ add_executable(fishcode
   "sources/password.hpp"
   "sources/string.hpp"
 )
+
