@@ -17,18 +17,24 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_STRING_HPP
-#define FISHCODE_STRING_HPP
-
-#include <string>
+#ifndef FISHCODE_COMMANDS_HPP
+#define FISHCODE_COMMANDS_HPP
 
 namespace fc {
 #if defined(_WIN32) || defined(_WIN64)
-  using string_t = std::wstring;
+  constexpr const auto CMD_COPYRIGHT = L"--copyright";
+  constexpr const auto CMD_HELP = L"--help";
+  constexpr const auto CMD_VERSION = L"--version";
+  constexpr const auto CMD_ENCRYPT = L"--encrypt";
+  constexpr const auto CMD_DECRYPT = L"--decrypt";
 #else
-  using string_t = std::string;
-#endif // UTF-16 or UTF-8 string.
+  constexpr const auto CMD_COPYRIGHT = "--copyright";
+  constexpr const auto CMD_HELP = "--help";
+  constexpr const auto CMD_VERSION = "--version";
+  constexpr const auto CMD_ENCRYPT = "--encrypt";
+  constexpr const auto CMD_DECRYPT = "--decrypt";
+#endif // UTF-16 or UTF-8 commands.
 }
 
-#endif // FISHCODE_STRING_HPP
+#endif // FISHCODE_COMMANDS_HPP
 

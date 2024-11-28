@@ -23,10 +23,13 @@
 #include <vector>
 #include <cstddef>
 #include "block.hpp"
+#include "commands.hpp"
 #include "error.hpp"
 #include "file.hpp"
 #include "fishcode.hpp"
 #include "key.hpp"
+#include "manual.hpp"
+#include "messages.hpp"
 #include "password.hpp"
 #include "string.hpp"
 
@@ -37,18 +40,13 @@ int fc::Main(const std::vector<fc::string_t>& argv) try {
     // Check subcommand.
     if (argv[1] == CMD_COPYRIGHT) {
       // Print copyright information.
-      std::cout <<
-        "FishCode (fishcode) is a program for encrypting and decrypting files.\n"
-        "Copyright (C) 2024 Vitaliy Tarasenko.\n"
-        "This program comes with ABSOLUTELY NO WARRANTY.\n"
-        "This is free software, and you are welcome to redistribute it\n"
-        "under certain conditions.\n";
+      std::cout << MSG_COPYRIGHT << '\n';
     } else if (argv[1] == CMD_HELP) {
       // Print user manual.
       std::cout << USER_MANUAL << '\n';
     } else if (argv[1] == CMD_VERSION) {
       // Print program version.
-      std::cout << "FishCode (fishcode) v1.0\n";
+      std::cout << MSG_VERSION << '\n';
     } else {
       // Invalid subcommand.
       throw InvalidSubcommandError();

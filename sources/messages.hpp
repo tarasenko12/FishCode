@@ -17,18 +17,18 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_STRING_HPP
-#define FISHCODE_STRING_HPP
-
-#include <string>
+#ifndef FISHCODE_MESSAGES_HPP
+#define FISHCODE_MESSAGES_HPP
 
 namespace fc {
-#if defined(_WIN32) || defined(_WIN64)
-  using string_t = std::wstring;
-#else
-  using string_t = std::string;
-#endif // UTF-16 or UTF-8 string.
+  constexpr const auto MSG_COPYRIGHT =
+    "FishCode (fishcode) is a program for encrypting and decrypting files.\n"
+    "Copyright (C) 2024 Vitaliy Tarasenko.\n"
+    "This program comes with ABSOLUTELY NO WARRANTY.\n"
+    "This is free software, and you are welcome to redistribute it\n"
+    "under certain conditions.";
+  constexpr const auto MSG_VERSION = "FishCode (fishcode) v1.1";
 }
 
-#endif // FISHCODE_STRING_HPP
+#endif // FISHCODE_MESSAGES_HPP
 
