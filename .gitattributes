@@ -1,4 +1,0 @@
-# Git should automatically detect the type of line endings for text files
-# and convert them according to the core.autocrlf setting.
-* text=auto
-
