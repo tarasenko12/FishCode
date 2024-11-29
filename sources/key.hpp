@@ -61,6 +61,7 @@ namespace fc {
   public:
     static Key Generate();
   public:
+    Key GetRoundKey(const int round) const;
     void Encrypt(const Key& anotherKey) noexcept;
     void Decrypt(const Key& anotherKey) noexcept;
   protected:

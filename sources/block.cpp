@@ -34,50 +34,62 @@ void fc::Block::PushByte(const std::uint8_t byte) {
 }
 
 void fc::Block::Encrypt(const fc::Key& key) noexcept {
-  // Step 1: swap bytes.
-  for (
-    std::size_t index = 1, counter = 0, pairs = bytes.size() / 2;
-    counter < pairs;
-    index += 2,
-    counter++
-  ) {
-    // Copy 'index - 1 byte' to the temporary storage.
-    const auto temp = bytes[index - 1];
+  // Encrypt block within 12 rounds.
+  for (int round = 0; round < 12; round++) {
+    // Step 1: swap bytes.
+    for (
+      std::size_t index = 1, counter = 0, pairs = bytes.size() / 2;
+      counter < pairs;
+      index += 2,
+      counter++
+    ) {
+      // Copy 'index - 1 byte' to the temporary storage.
+      const auto temp = bytes[index - 1];
 
-    // Move 'index byte'.
-    bytes[index - 1] = bytes[index];
+      // Move 'index byte'.
+      bytes[index - 1] = bytes[index];
 
-    // Store 'index - 1 byte'.
-    bytes[index] = temp;
-  }
+      // Store 'index - 1 byte'.
+      bytes[index] = temp;
+    }
+    
+    // Step 2: get round key.
+    const auto roundKey = key.GetRoundKey(round);
 
-  // Step 2: xor key.
-  for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
-    bytes[index] ^= key[index];
+    // Step 3: xor key.
+    for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
+      bytes[index] ^= roundKey[index];
+    }
   }
 }
 
 void fc::Block::Decrypt(const fc::Key& key) noexcept {
-  // Step 1: xor key.
-  for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
-    bytes[index] ^= key[index];
-  }
+  // Decrypt block within 12 rounds.
+  for (int round = 11; round >= 0; round--) {
+    // Step 1: get round key.
+    const auto roundKey = key.GetRoundKey(round);
+    
+    // Step 2: xor key.
+    for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
+      bytes[index] ^= key[index];
+    }
 
-  // Step 2: swap bytes.
-  for (
-    std::size_t index = 1, counter = 0, pairs = bytes.size() / 2;
-    counter < pairs;
-    index += 2,
-    counter++
-  ) {
-    // Copy 'index - 1 byte' to the temporary storage.
-    const auto temp = bytes[index - 1];
+    // Step 3: swap bytes.
+    for (
+      std::size_t index = 1, counter = 0, pairs = bytes.size() / 2;
+      counter < pairs;
+      index += 2,
+      counter++
+    ) {
+      // Copy 'index - 1 byte' to the temporary storage.
+      const auto temp = bytes[index - 1];
 
-    // Move 'index byte'.
-    bytes[index - 1] = bytes[index];
+      // Move 'index byte'.
+      bytes[index - 1] = bytes[index];
 
-    // Store 'index - 1 byte'.
-    bytes[index] = temp;
+      // Store 'index - 1 byte'.
+      bytes[index] = temp;
+    }
   }
 }
 
