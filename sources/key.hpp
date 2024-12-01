@@ -28,15 +28,20 @@ namespace fc {
   class Key {
   public:
     static constexpr const std::size_t SIZE = 16;
-  public:
-    Key() noexcept;
-  public:
+    
+    Key() = default;
+    Key(const Key& otherKey) = default;
+    Key(Key&& otherKey) = default;
+    
+    Key& operator=(const Key& otherKey) = default;
+    Key& operator=(Key&& otherKey) = default;
+
     inline const std::uint8_t& operator[](const std::size_t index)
     const noexcept {
       // Call corresponding std::array overloaded operator.
       return bytes[index];
     }
-  public:
+
     inline std::array<std::uint8_t, SIZE>::iterator begin() noexcept {
       // Call corresponding std::array method.
       return bytes.begin();
@@ -58,9 +63,9 @@ namespace fc {
       // Call corresponding std::array method.
       return bytes.end();
     }
-  public:
+
     static Key Generate();
-  public:
+
     Key GetRoundKey(const int round) const;
     void Encrypt(const Key& anotherKey) noexcept;
     void Decrypt(const Key& anotherKey) noexcept;

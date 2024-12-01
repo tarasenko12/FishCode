@@ -17,17 +17,34 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_HPP
-#define FISHCODE_HPP
+#ifndef FISHCODE_ARGUMENTS_HPP
+#define FISHCODE_ARGUMENTS_HPP
 
-#include "arguments.hpp"
+#include <filesystem>
+#include "file.hpp"
+#include "password.hpp"
 #include "string.hpp"
 
 namespace fc {
-  // Program-own main functions.
-  void Main(const string_t& subcommand);
-  void Main(const string_t& subcommand, Arguments& arguments);
+  struct Arguments {
+    Arguments() = default;
+    Arguments(
+      const std::filesystem::path& pathToInputFile,
+      const bool encryptedInputFile,
+      const std::filesystem::path& pathToOutputFile,
+      const string_t& passwordString
+    );
+    Arguments(const Arguments& otherArguments) = delete;
+    Arguments(Arguments&& otherArguments) = default;
+    
+    Arguments& operator=(const Arguments& otherArguments) = delete;
+    Arguments& operator=(Arguments&& otherArguments) = default;
+    
+    InputFile inputFile;
+    OutputFile outputFile;
+    Password password;
+  };
 }
 
-#endif // FISHCODE_HPP
+#endif // FISHCODE_ARGUMENTS_HPP
 

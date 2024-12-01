@@ -20,8 +20,6 @@
 #ifndef FISHCODE_ERROR_HPP
 #define FISHCODE_ERROR_HPP
 
-#include "fishcode.hpp"
-
 namespace fc {
   class Error {
   public:

@@ -29,9 +29,14 @@ namespace fc {
   class Block {
   public:
     static constexpr const std::size_t SIZE = 16;
-  public:
+
     Block();
-  public:
+    Block(const Block& otherBlock) = default;
+    Block(Block&& otherBlock) = default;
+    
+    Block& operator=(const Block& otherBlock) = default;
+    Block& operator=(Block&& otherBlock) = default;
+
     inline std::vector<std::uint8_t>::const_iterator begin() const noexcept {
       // Call corresponding std::vector method.
       return bytes.begin();
@@ -41,7 +46,7 @@ namespace fc {
       // Call corresponding std::vector method.
       return bytes.end();
     }
-  public:
+
     void PushByte(const std::uint8_t byte);
     void Encrypt(const Key& key) noexcept;
     void Decrypt(const Key& key) noexcept;

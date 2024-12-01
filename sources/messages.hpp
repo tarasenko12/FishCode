@@ -27,7 +27,10 @@ namespace fc {
     "This program comes with ABSOLUTELY NO WARRANTY.\n"
     "This is free software, and you are welcome to redistribute it\n"
     "under certain conditions.";
-  constexpr const auto MSG_VERSION = "FishCode (fishcode) v1.1";
+  constexpr const auto MSG_VERSION = "FishCode (fishcode) v1.2";
+  constexpr const auto MSG_SYSTEM_EXCEPTION =
+    "Error: system exception!\n"
+    "Method \"what()\" has returned such string:\n";
 }
 
 #endif // FISHCODE_MESSAGES_HPP

@@ -18,9 +18,14 @@
 */
 
 #include <iostream>
-#include <vector>
 #include <cstddef>
+#include "arguments.hpp"
+#include "commands.hpp"
+#include "error.hpp"
 #include "fishcode.hpp"
+#include "manual.hpp"
+#include "messages.hpp"
+#include "results.hpp"
 #include "string.hpp"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -31,34 +36,53 @@ int wmain(const int argc, const wchar_t* argv[])
 int main(const int argc, const char* argv[])
 #endif // UTF-16 or UTF-8 command-line arguments.
 try {
-  // Create an empty vector for command-line arguments.
-  std::vector<fc::string_t> cpp_argv;
-
-  // Allocate memory to store command-line arguments.
-  cpp_argv.reserve(argc);
-
-  // Copy command-line arguments to the vector.
-  for (int index = 0; index < argc; index++) {
-    cpp_argv.push_back(argv[index]);
+  // Check usage mode.
+  if (argc == 2) {
+    // Call program-own main function with one-word subcommand.
+    fc::Main(argv[1]);
+  } else if (argc == 5) {
+    // Parse command-line arguments.
+    // Store subcommand.
+    const fc::string_t subcommand = argv[1];
+    
+    // Create storage for the arguments.
+    fc::Arguments arguments;
+    
+    // Check input file type.
+    if (subcommand == fc::CMD_ENCRYPT) {
+      // Plaintext.
+      arguments = fc::Arguments(argv[2], false, argv[3], argv[4]);
+    } else if (subcommand == fc::CMD_DECRYPT) {
+      // Encrypted input file.
+      arguments = fc::Arguments(argv[2], true, argv[3], argv[4]);
+    } else {
+      // Invalid subcommand.
+      throw fc::InvalidSubcommandError();
+    }
+    
+    // Call program-own main function with arguments.
+    fc::Main(subcommand, arguments);
+  } else {
+    // Invalid usage.
+    throw fc::InvalidUsageError();
   }
-
-  // Call program-own main function.
-  // Use fc::Main() return value as exit code.
-  return fc::Main(cpp_argv);
+  
+  // Return success code.
+  return fc::Results::SUCCESS;
 } catch (const std::exception& ex) {
   // Print message for the user.
-  std::cerr
-    <<
-      "Error: system exception!\n"
-      "Method \"what()\" has returned such string:\n"
-    <<
-      '\"'
-    <<
-      ex.what()
-    <<
-      "\"\n";
+  std::cerr << fc::MSG_SYSTEM_EXCEPTION << '\"' << ex.what() << "\"\n";
 
   // Return error code.
   return fc::Results::SYSTEM_EXCEPTION;
+} catch (const fc::Error& err) {
+  // Print message for the user.
+  std::cerr << err.What() << "\n\n";
+
+  // Print user manual.
+  std::cerr << fc::USER_MANUAL << '\n';
+
+  // Return error code.
+  return err.GetErrorCode();
 }
 

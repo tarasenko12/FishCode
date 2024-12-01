@@ -30,8 +30,14 @@
 namespace fc {
   class InputFile {
   public:
-    InputFile(const std::filesystem::path& fsPath, bool isEncrypted);
-  public:
+    InputFile() = default;
+    InputFile(const std::filesystem::path& fsPath, const bool isEncrypted);
+    InputFile(const InputFile& anotherFile) = delete;
+    InputFile(InputFile&& anotherFile) = default;
+    
+    InputFile& operator=(const InputFile& anotherFile) = delete;
+    InputFile& operator=(InputFile&& anotherFile) = default;
+
     std::size_t GetBlocksNumber() const noexcept;
     std::size_t GetPartialBlockSize() const noexcept;
     bool HasPartialBlock() const noexcept;
@@ -46,8 +52,14 @@ namespace fc {
 
   class OutputFile {
   public:
+    OutputFile() = default;
     OutputFile(const std::filesystem::path& fsPath);
-  public:
+    OutputFile(const OutputFile& anotherFile) = delete;
+    OutputFile(OutputFile&& anotherFile) = default;
+    
+    OutputFile& operator=(const OutputFile& anotherFile) = delete;
+    OutputFile& operator=(OutputFile&& anotherFile) = default;
+
     void WriteBlock(const Block& block);
     void WriteKey(const Key& key);
   private:

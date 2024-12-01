@@ -17,17 +17,21 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_HPP
-#define FISHCODE_HPP
-
-#include "arguments.hpp"
-#include "string.hpp"
+#ifndef FISHCODE_RESULTS_HPP
+#define FISHCODE_RESULTS_HPP
 
 namespace fc {
-  // Program-own main functions.
-  void Main(const string_t& subcommand);
-  void Main(const string_t& subcommand, Arguments& arguments);
+  // Program exit codes.
+  enum Results : int {
+    SUCCESS,
+    INVALID_PASSWORD,
+    INVALID_INPUT_FILE,
+    INVALID_OUTPUT_FILE,
+    INVALID_USAGE,
+    INVALID_SUBCOMMAND,
+    SYSTEM_EXCEPTION
+  };
 }
 
-#endif // FISHCODE_HPP
+#endif // FISHCODE_RESULTS_HPP
 

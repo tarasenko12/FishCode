@@ -30,7 +30,13 @@ namespace fc {
     static constexpr const std::size_t MIN_LENGTH = 8;
     static constexpr const std::size_t MAX_LENGTH = 16;
   public:
-    Password(const fc::string_t& passwordString);
+    Password() = default;
+    Password(const string_t& passwordString);
+    Password(const Password& otherPassword) = default;
+    Password(Password&& otherPassword) = default;
+    
+    Password& operator=(const Password& otherPassword) = default;
+    Password& operator=(Password&& otherPassword) = default;
   };
 }
 

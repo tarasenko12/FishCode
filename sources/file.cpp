@@ -28,7 +28,7 @@
 
 fc::InputFile::InputFile(
   const std::filesystem::path& fsPath,
-  bool isEncrypted
+  const bool isEncrypted
 ) {
   // Check path to the file.
   if (!std::filesystem::is_regular_file(fsPath)) {

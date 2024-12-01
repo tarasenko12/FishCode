@@ -18,7 +18,7 @@
 */
 
 #include "error.hpp"
-#include "fishcode.hpp"
+#include "results.hpp"
 
 const char* fc::InvalidPasswordError::What() const noexcept {
   // Return corresponding error message.

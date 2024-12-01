@@ -23,8 +23,6 @@
 #include <cstdint>
 #include "key.hpp"
 
-fc::Key::Key() noexcept : bytes{} {}
-
 fc::Key fc::Key::Generate() {
   // Create a new empty key.
   Key newKey;
