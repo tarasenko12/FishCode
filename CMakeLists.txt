@@ -4,9 +4,9 @@ cmake_minimum_required(VERSION 3.20)
 # It is C++ project.
 project(FishCode CXX)
 
-# It is FishCode (fishcode) v1.1.
+# It is FishCode (fishcode) v1.2.
 set(CMAKE_PROJECT_VERSION_MAJOR 1)
-set(CMAKE_PROJECT_VERSION_MINOR 1)
+set(CMAKE_PROJECT_VERSION_MINOR 2)
 
 # The project requires C++20 standard.
 set(CMAKE_CXX_STANDARD 20)
@@ -17,6 +17,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # The main executable and its dependecies.
 add_executable(fishcode
+  "sources/arguments.cpp"
+  "sources/arguments.hpp"
   "sources/block.cpp"
   "sources/block.hpp"
   "sources/commands.hpp"
@@ -33,6 +35,7 @@ add_executable(fishcode
   "sources/messages.hpp"
   "sources/password.cpp"
   "sources/password.hpp"
+  "sources/results.hpp"
   "sources/string.hpp"
 )
 
