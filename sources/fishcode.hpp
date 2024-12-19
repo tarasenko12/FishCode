@@ -15,18 +15,33 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include "arguments.hpp"
-#include "string.hpp"
+#include <wx/app.h>
+#include "frame.hpp"
 
 namespace fc {
-  // Program-own main functions.
-  void Main(const string_t& subcommand);
-  void Main(const string_t& subcommand, Arguments& arguments);
+  class FishCode : public wxApp {
+  public:
+    FishCode() noexcept;
+    FishCode(const FishCode& otherFishCode) = delete;
+    FishCode(FishCode&& otherFishCode) = delete;
+
+    FishCode& operator=(const FishCode& otherFishCode) = delete;
+    FishCode& operator=(FishCode&& otherFishCode) = delete;
+
+    bool OnInit() override;
+  private:
+    Frame* frame;
+  };
 }
 
 #endif // FISHCODE_HPP

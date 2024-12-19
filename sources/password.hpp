@@ -20,9 +20,9 @@
 #ifndef FISHCODE_PASSWORD_HPP
 #define FISHCODE_PASSWORD_HPP
 
+#include <string>
 #include <cstddef>
 #include "key.hpp"
-#include "string.hpp"
 
 namespace fc {
   class Password : public Key {
@@ -31,10 +31,10 @@ namespace fc {
     static constexpr const std::size_t MAX_LENGTH = 16;
   public:
     Password() = default;
-    Password(const string_t& passwordString);
+    Password(const std::string& passwordString);
     Password(const Password& otherPassword) = default;
     Password(Password&& otherPassword) = default;
-    
+
     Password& operator=(const Password& otherPassword) = default;
     Password& operator=(Password&& otherPassword) = default;
   };

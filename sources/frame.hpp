@@ -15,25 +15,28 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <filesystem>
-#include "arguments.hpp"
-#include "file.hpp"
-#include "password.hpp"
-#include "string.hpp"
+#ifndef FISHCODE_FRAME_HPP
+#define FISHCODE_FRAME_HPP
 
-// Open input file (encrypted or not).
-// Create output file.
-// Create binary representation of the password.
-fc::Arguments::Arguments(
-  const std::filesystem::path& pathToInputFile,
-  const bool encryptedInputFile,
-  const std::filesystem::path& pathToOutputFile,
-  const string_t& passwordString
-)
-: inputFile(pathToInputFile, encryptedInputFile),
-  outputFile(pathToOutputFile),
-  password(passwordString)
-{}
+#include <wx/frame.h>
 
+namespace fc {
+  class Frame : public wxFrame {
+  public:
+    Frame();
+    Frame(const Frame& otherFrame) = delete;
+    Frame(Frame&& otherFrame) = delete;
+
+    Frame& operator=(const Frame& otherFrame) = delete;
+    Frame& operator=(Frame&& otherFrame) = delete;
+  };
+}
+
+#endif // FISHCODE_FRAME_HPP

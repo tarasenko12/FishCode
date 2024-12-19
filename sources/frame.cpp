@@ -15,23 +15,16 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_RESULTS_HPP
-#define FISHCODE_RESULTS_HPP
+#include "frame.hpp"
 
-namespace fc {
-  // Program exit codes.
-  enum Results : int {
-    SUCCESS,
-    INVALID_PASSWORD,
-    INVALID_INPUT_FILE,
-    INVALID_OUTPUT_FILE,
-    INVALID_USAGE,
-    INVALID_SUBCOMMAND,
-    SYSTEM_EXCEPTION
-  };
-}
-
-#endif // FISHCODE_RESULTS_HPP
+fc::Frame::Frame()
+: wxFrame(nullptr, wxID_ANY, "FishCode")
+{}
 

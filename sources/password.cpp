@@ -17,13 +17,13 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <string>
 #include <cstddef>
 #include <cstdint>
 #include "error.hpp"
 #include "password.hpp"
-#include "string.hpp"
 
-fc::Password::Password(const fc::string_t& passwordString) {
+fc::Password::Password(const std::string& passwordString) {
   // Get length of the string.
   const auto length = passwordString.length();
 

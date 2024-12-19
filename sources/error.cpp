@@ -18,55 +18,19 @@
 */
 
 #include "error.hpp"
-#include "results.hpp"
 
-const char* fc::InvalidPasswordError::What() const noexcept {
+const char* fc::InvalidPasswordError::what() const noexcept {
   // Return corresponding error message.
   return "Error: invalid password!";
 }
 
-int fc::InvalidPasswordError::GetErrorCode() const noexcept {
-  // Return corresponding error code.
-  return Results::INVALID_PASSWORD;
-}
-
-const char* fc::InvalidInputFileError::What() const noexcept {
+const char* fc::InvalidInputFileError::what() const noexcept {
   // Return corresponding error message.
   return "Error: invalid input file!";
 }
 
-int fc::InvalidInputFileError::GetErrorCode() const noexcept {
-  // Return corresponding error code.
-  return Results::INVALID_INPUT_FILE;
-}
-
-const char* fc::InvalidOutputFileError::What() const noexcept {
+const char* fc::InvalidOutputFileError::what() const noexcept {
   // Return corresponding error message.
   return "Error: invalid output file!";
-}
-
-int fc::InvalidOutputFileError::GetErrorCode() const noexcept {
-  // Return corresponding error code.
-  return Results::INVALID_OUTPUT_FILE;
-}
-
-const char* fc::InvalidUsageError::What() const noexcept {
-  // Return corresponding error message.
-  return "Error: invalid usage!";
-}
-
-int fc::InvalidUsageError::GetErrorCode() const noexcept {
-  // Return corresponding error code.
-  return Results::INVALID_USAGE;
-}
-
-const char* fc::InvalidSubcommandError::What() const noexcept {
-  // Return corresponding error message.
-  return "Error: invalid subcommand!";
-}
-
-int fc::InvalidSubcommandError::GetErrorCode() const noexcept {
-  // Return corresponding error code.
-  return Results::INVALID_SUBCOMMAND;
 }
 

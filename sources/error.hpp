@@ -20,41 +20,43 @@
 #ifndef FISHCODE_ERROR_HPP
 #define FISHCODE_ERROR_HPP
 
+#include <exception>
+
 namespace fc {
-  class Error {
+  class InvalidPasswordError : public std::exception {
   public:
-    virtual const char* What() const noexcept = 0;
-    virtual int GetErrorCode() const noexcept = 0;
+    InvalidPasswordError() noexcept = default;
+    InvalidPasswordError(const InvalidPasswordError& other) = default;
+    InvalidPasswordError(InvalidPasswordError&& other) = default;
+
+    InvalidPasswordError& operator=(const InvalidPasswordError& other) = default;
+    InvalidPasswordError& operator=(InvalidPasswordError&& other) = default;
+
+    const char* what() const noexcept override;
   };
 
-  class InvalidPasswordError : public Error {
+  class InvalidInputFileError : public std::exception {
   public:
-    const char* What() const noexcept override;
-    int GetErrorCode() const noexcept override;
+    InvalidInputFileError() noexcept = default;
+    InvalidInputFileError(const InvalidInputFileError& other) = default;
+    InvalidInputFileError(InvalidInputFileError&& other) = default;
+
+    InvalidInputFileError& operator=(const InvalidInputFileError& other) = default;
+    InvalidInputFileError& operator=(InvalidInputFileError&& other) = default;
+
+    const char* what() const noexcept override;
   };
 
-  class InvalidInputFileError : public Error {
+  class InvalidOutputFileError : public std::exception {
   public:
-    const char* What() const noexcept override;
-    int GetErrorCode() const noexcept override;
-  };
+    InvalidOutputFileError() noexcept = default;
+    InvalidOutputFileError(const InvalidOutputFileError& other) = default;
+    InvalidOutputFileError(InvalidOutputFileError&& other) = default;
 
-  class InvalidOutputFileError : public Error {
-  public:
-    const char* What() const noexcept override;
-    int GetErrorCode() const noexcept override;
-  };
+    InvalidOutputFileError& operator=(const InvalidOutputFileError& other) = default;
+    InvalidOutputFileError& operator=(InvalidOutputFileError&& other) = default;
 
-  class InvalidUsageError : public Error {
-  public:
-    const char* What() const noexcept override;
-    int GetErrorCode() const noexcept override;
-  };
-
-  class InvalidSubcommandError : public Error {
-  public:
-    const char* What() const noexcept override;
-    int GetErrorCode() const noexcept override;
+    const char* what() const noexcept override;
   };
 }
 

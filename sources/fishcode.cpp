@@ -15,121 +15,31 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <iostream>
-#include <cstddef>
-#include "block.hpp"
-#include "commands.hpp"
-#include "error.hpp"
-#include "file.hpp"
 #include "fishcode.hpp"
-#include "key.hpp"
-#include "manual.hpp"
-#include "messages.hpp"
-#include "password.hpp"
-#include "string.hpp"
+#include "frame.hpp"
 
-void fc::Main(const fc::string_t& subcommand) {
-  // Check subcommand.
-  if (subcommand == CMD_COPYRIGHT) {
-    // Print copyright information.
-    std::cout << MSG_COPYRIGHT << '\n';
-  } else if (subcommand == CMD_HELP) {
-    // Print user manual.
-    std::cout << USER_MANUAL << '\n';
-  } else if (subcommand == CMD_VERSION) {
-    // Print program version.
-    std::cout << MSG_VERSION << '\n';
-  } else {
-    // Invalid subcommand.
-    throw InvalidSubcommandError();
-  }
+fc::FishCode::FishCode() noexcept
+: frame(nullptr)
+{}
+
+bool fc::FishCode::OnInit() {
+  // Create the main window (frame).
+  frame = new Frame();
+
+  // Show the window.
+  frame->Show();
+
+  // Start the application.
+  return true;
 }
 
-void fc::Main(const fc::string_t& subcommand, fc::Arguments& arguments) {
-  // Check subcommand.
-  if (subcommand == CMD_ENCRYPT) {
-    // Encrypt the file.
-    // Generate encryption key.
-    auto key = Key::Generate();
-
-    // Encrypt the key with password.
-    key.Encrypt(arguments.password);
-
-    // Store encrypted key to the output file.
-    arguments.outputFile.WriteKey(key);
-
-    // Decrypt the key.
-    key.Decrypt(arguments.password);
-
-    // Get number of blocks in the input file.
-    const auto inputFileBlocks = arguments.inputFile.GetBlocksNumber();
-
-    // Encrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < inputFileBlocks; counter++) {
-      // Read one block from the file.
-      auto block = arguments.inputFile.ReadBlock();
-
-      // Encrypt the block.
-      block.Encrypt(key);
-
-      // Store block to the output file.
-      arguments.outputFile.WriteBlock(block);
-    }
-
-    // Check if the input file has partial block.
-    if (arguments.inputFile.HasPartialBlock()) {
-      // Read partial block.
-      auto block = arguments.inputFile.ReadBlock(
-        arguments.inputFile.GetPartialBlockSize()
-      );
-
-      // Encrypt the block.
-      block.Encrypt(key);
-
-      // Store block to the output file.
-      arguments.outputFile.WriteBlock(block);
-    }
-  } else {
-    // Decrypt the file.
-    // Read key from the input file.
-    auto key = arguments.inputFile.ReadKey();
-
-    // Decrypt key using the password.
-    key.Decrypt(arguments.password);
-
-    // Get number of blocks in the input file (except key).
-    const auto inputFileBlocks = arguments.inputFile.GetBlocksNumber() - 1;
-
-    // Decrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < inputFileBlocks; counter++) {
-      // Read one block from the file.
-      auto block = arguments.inputFile.ReadBlock();
-
-      // Decrypt the block.
-      block.Decrypt(key);
-
-      // Store block to the output file.
-      arguments.outputFile.WriteBlock(block);
-    }
-
-    // Check if the input file has partial block.
-    if (arguments.inputFile.HasPartialBlock()) {
-      // Read partial block.
-      auto block = arguments.inputFile.ReadBlock(
-        arguments.inputFile.GetPartialBlockSize()
-      );
-
-      // Decrypt the block.
-      block.Decrypt(key);
-
-      // Store block to the output file.
-      arguments.outputFile.WriteBlock(block);
-    }
-  }
-
-  // Print message for the user.
-  std::cout << "Processed successfully.\n";
-}
+// This defines the equivalent of main() for the current platform.
+wxIMPLEMENT_APP(fc::FishCode);
 
