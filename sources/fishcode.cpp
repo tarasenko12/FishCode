@@ -25,6 +25,7 @@
 #include <exception>
 #include <iostream>
 #include <wx/button.h>
+#include <wx/frame.h>
 #include <wx/gauge.h>
 #include <wx/menu.h>
 #include <wx/menuitem.h>
@@ -33,11 +34,14 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include "fishcode.hpp"
-#include "frame.hpp"
 #include "password.hpp"
 
-fc::FishCode::FishCode()
+fc::FishCode::FishCode() noexcept
 : frame(nullptr),
+  menuBar(nullptr),
+  menuMore(nullptr),
+  menuMoreAbout(nullptr),
+  menuMoreHelp(nullptr),
   mainSizer(nullptr),
   inputFileSizer(nullptr),
   outputFileSizer(nullptr),
@@ -58,13 +62,47 @@ fc::FishCode::FishCode()
 
 bool fc::FishCode::OnInit() try {
   // Create the main window (frame).
-  frame = new Frame();
+  frame = new wxFrame(
+    nullptr,
+    wxID_ANY,
+    "FishCode",
+    wxDefaultPosition,
+    wxDefaultSize,
+    wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
+  );
+
+  // Create a new menu bar for the frame.
+  menuBar = new wxMenuBar();
+
+  // Connect menu bar to the frame.
+  frame->SetMenuBar(menuBar);
+
+  // Initialize menu bar menu(s).
+  menuMore = new wxMenu();
+
+  // Initialize "More..." menu items.
+  menuMoreAbout = new wxMenuItem(
+    menuMore,
+    wxID_ABOUT,
+    "About",
+    "Get more information about the program."
+  );
+  menuMoreHelp = new wxMenuItem(
+    menuMore,
+    wxID_HELP,
+    "Help",
+    "Get user documentation."
+  );
+
+  // Append this menu to the menu bar.
+  menuBar->Append(menuMore, "More...");
+
+  // Append these items to the "More..." menu.
+  menuMore->Append(menuMoreAbout);
+  menuMore->Append(menuMoreHelp);
 
   // Initialize new sizer for the main window.
   mainSizer = new wxBoxSizer(wxVERTICAL);
-
-  // Connect main window (frame) with sizer.
-  frame->SetSizer(mainSizer);
 
   // Create sizer for the input file chooser.
   inputFileSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -148,6 +186,9 @@ bool fc::FishCode::OnInit() try {
 
   // Connect this sizer to the main sizer.
   mainSizer->Add(buttonsSizer, 0, wxALL | wxALIGN_CENTER, 0);
+
+  // Connect main window (frame) with sizer.
+  frame->SetSizerAndFit(mainSizer);
 
   // Show the window.
   frame->Show();

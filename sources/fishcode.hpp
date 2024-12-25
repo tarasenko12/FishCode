@@ -27,18 +27,18 @@
 
 #include <wx/app.h>
 #include <wx/button.h>
+#include <wx/frame.h>
 #include <wx/gauge.h>
 #include <wx/menu.h>
 #include <wx/menuitem.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
-#include "frame.hpp"
 
 namespace fc {
   class FishCode : public wxApp {
   public:
-    FishCode();
+    FishCode() noexcept;
     FishCode(const FishCode& otherFishCode) = delete;
     FishCode(FishCode&& otherFishCode) = delete;
 
@@ -47,7 +47,11 @@ namespace fc {
 
     bool OnInit() override;
   private:
-    Frame* frame;
+    wxFrame* frame;
+    wxMenuBar* menuBar;
+    wxMenu* menuMore;
+    wxMenuItem* menuMoreAbout;
+    wxMenuItem* menuMoreHelp;
     wxBoxSizer* mainSizer;
     wxBoxSizer* inputFileSizer;
     wxBoxSizer* outputFileSizer;
