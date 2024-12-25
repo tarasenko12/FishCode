@@ -26,12 +26,19 @@
 #define FISHCODE_HPP
 
 #include <wx/app.h>
+#include <wx/button.h>
+#include <wx/gauge.h>
+#include <wx/menu.h>
+#include <wx/menuitem.h>
+#include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/textctrl.h>
 #include "frame.hpp"
 
 namespace fc {
   class FishCode : public wxApp {
   public:
-    FishCode() noexcept;
+    FishCode();
     FishCode(const FishCode& otherFishCode) = delete;
     FishCode(FishCode&& otherFishCode) = delete;
 
@@ -41,6 +48,22 @@ namespace fc {
     bool OnInit() override;
   private:
     Frame* frame;
+    wxBoxSizer* mainSizer;
+    wxBoxSizer* inputFileSizer;
+    wxBoxSizer* outputFileSizer;
+    wxBoxSizer* passwordSizer;
+    wxBoxSizer* buttonsSizer;
+    wxStaticText* inputFileLabel;
+    wxStaticText* outputFileLabel;
+    wxStaticText* passwordLabel;
+    wxTextCtrl* inputFileLine;
+    wxTextCtrl* outputFileLine;
+    wxButton* inputFileChooser;
+    wxButton* outputFileChooser;
+    wxTextCtrl* passwordLine;
+    wxGauge* progressBar;
+    wxButton* encryptButton;
+    wxButton* decryptButton;
   };
 }
 

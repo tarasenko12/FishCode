@@ -26,5 +26,11 @@
 
 fc::Frame::Frame()
 : wxFrame(nullptr, wxID_ANY, "FishCode")
-{}
+{
+  // Set minimal size for the frame.
+  SetMinSize(wxSize(500, 400));
+
+  // Set maximum size for the frame.
+  SetMaxSize(wxSize(700, 500));
+}
 
