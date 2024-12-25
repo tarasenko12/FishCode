@@ -33,8 +33,6 @@ add_executable(fishcode WIN32
   "sources/file.hpp"
   "sources/fishcode.cpp"
   "sources/fishcode.hpp"
-  "sources/frame.cpp"
-  "sources/frame.hpp"
   "sources/key.cpp"
   "sources/key.hpp"
   "sources/password.cpp"
