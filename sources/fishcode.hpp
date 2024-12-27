@@ -33,6 +33,7 @@
 #include <wx/menuitem.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/statusbr.h>
 #include <wx/textctrl.h>
 
 namespace fc {
@@ -68,6 +69,7 @@ namespace fc {
     wxGauge* progressBar;
     wxButton* encryptButton;
     wxButton* decryptButton;
+    wxStatusBar* statusBar;
   };
 }
 

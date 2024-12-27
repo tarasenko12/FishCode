@@ -32,9 +32,17 @@
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
+#include <wx/statusbr.h>
 #include <wx/textctrl.h>
+#include "block.hpp"
+#include "error.hpp"
+#include "file.hpp"
 #include "fishcode.hpp"
+#include "key.hpp"
 #include "password.hpp"
+
+// This defines the equivalent of main() for the current platform.
+wxIMPLEMENT_APP(fc::FishCode);
 
 fc::FishCode::FishCode() noexcept
 : frame(nullptr),
@@ -57,19 +65,13 @@ fc::FishCode::FishCode() noexcept
   passwordLine(nullptr),
   progressBar(nullptr),
   encryptButton(nullptr),
-  decryptButton(nullptr)
+  decryptButton(nullptr),
+  statusBar(nullptr)
 {}
 
 bool fc::FishCode::OnInit() try {
   // Create the main window (frame).
-  frame = new wxFrame(
-    nullptr,
-    wxID_ANY,
-    "FishCode",
-    wxDefaultPosition,
-    wxDefaultSize,
-    wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)
-  );
+  frame = new wxFrame(nullptr, wxID_ANY, "FishCode");
 
   // Create a new menu bar for the frame.
   menuBar = new wxMenuBar();
@@ -101,6 +103,18 @@ bool fc::FishCode::OnInit() try {
   menuMore->Append(menuMoreAbout);
   menuMore->Append(menuMoreHelp);
 
+  // Create a new status bar for the frame.
+  statusBar = new wxStatusBar(frame);
+
+  // Set status to "Ready".
+  statusBar->SetStatusText("Ready");
+
+  // Add this status bar to the frame.
+  frame->SetStatusBar(statusBar);
+
+  // Set layout for the fields.
+  const wxSize fieldSize(400, 45);
+
   // Initialize new sizer for the main window.
   mainSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -111,6 +125,9 @@ bool fc::FishCode::OnInit() try {
   inputFileLabel = new wxStaticText(frame, wxID_ANY, "Input file:");
   inputFileLine = new wxTextCtrl(frame, wxID_ANY);
   inputFileChooser = new wxButton(frame, wxID_ANY, "Choose...");
+
+  // Configure input file line layout.
+  inputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
   inputFileSizer->Add(inputFileLabel, 0, wxALL | wxALIGN_CENTER, 10);
@@ -127,6 +144,9 @@ bool fc::FishCode::OnInit() try {
   outputFileLabel = new wxStaticText(frame, wxID_ANY, "Output file:");
   outputFileLine = new wxTextCtrl(frame, wxID_ANY);
   outputFileChooser = new wxButton(frame, wxID_ANY, "Set...");
+
+  // Configure output file line layout.
+  outputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
   outputFileSizer->Add(outputFileLabel, 0, wxALL | wxALIGN_CENTER, 10);
@@ -152,6 +172,7 @@ bool fc::FishCode::OnInit() try {
 
   // Configure password listener.
   passwordLine->SetMaxLength(Password::SIZE);
+  passwordLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
   passwordSizer->Add(passwordLabel, 0, wxALL | wxALIGN_CENTER, 10);
@@ -169,6 +190,12 @@ bool fc::FishCode::OnInit() try {
     wxDefaultSize,
     wxGA_HORIZONTAL | wxGA_TEXT | wxGA_PROGRESS
   );
+
+  // Configure progress bar size.
+  progressBar->SetMinSize(wxSize(400, 15));
+
+  // Hide the progress bar for now.
+  progressBar->Hide();
 
   // Add progress bar to the main sizer.
   mainSizer->Add(progressBar, 0, wxALL | wxALIGN_CENTER, 10);
@@ -205,7 +232,4 @@ bool fc::FishCode::OnInit() try {
   // Do not start the application.
   return false;
 }
-
-// This defines the equivalent of main() for the current platform.
-wxIMPLEMENT_APP(fc::FishCode);
 

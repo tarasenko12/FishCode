@@ -24,18 +24,12 @@
 #include "password.hpp"
 
 fc::Password::Password(const std::string& passwordString) {
-  // Get length of the string.
+  // Get length of the string (in bytes).
   const auto length = passwordString.length();
-
-  // Check length of the password string.
-  if (length < MIN_LENGTH || length > MAX_LENGTH) {
-    // Invalid password.
-    throw InvalidPasswordError();
-  }
 
   // Check password characters.
   for (const auto symbol : passwordString) {
-    if (symbol < 0x21 || symbol > 0x7E) {
+    if (symbol < '!' || symbol > '~') {
       // Invalid symbol (and password too).
       throw InvalidPasswordError();
     }
@@ -47,7 +41,7 @@ fc::Password::Password(const std::string& passwordString) {
   }
 
   // Check if password string has not maximal length.
-  if (length < MAX_LENGTH) {
+  if (length < SIZE) {
     // Append additional bytes from the beginning.
     for (
       std::size_t index = 0, offset = length;

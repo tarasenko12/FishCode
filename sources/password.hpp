@@ -26,9 +26,6 @@
 
 namespace fc {
   class Password : public Key {
-  private:
-    static constexpr const std::size_t MIN_LENGTH = 8;
-    static constexpr const std::size_t MAX_LENGTH = 16;
   public:
     Password() = default;
     Password(const std::string& passwordString);
