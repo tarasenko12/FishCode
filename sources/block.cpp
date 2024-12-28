@@ -34,8 +34,8 @@ void fc::Block::PushByte(const std::uint8_t byte) {
 }
 
 void fc::Block::Encrypt(const fc::Key& key) noexcept {
-  // Encrypt block within 12 rounds.
-  for (int round = 0; round < 12; round++) {
+  // Encrypt block within 10 rounds.
+  for (int round = 0; round < 10; round++) {
     // Step 1: swap bytes.
     for (
       std::size_t index = 1, counter = 0, pairs = bytes.size() / 2;
@@ -64,8 +64,8 @@ void fc::Block::Encrypt(const fc::Key& key) noexcept {
 }
 
 void fc::Block::Decrypt(const fc::Key& key) noexcept {
-  // Decrypt block within 12 rounds.
-  for (int round = 11; round >= 0; round--) {
+  // Decrypt block within 10 rounds.
+  for (int round = 9; round >= 0; round--) {
     // Step 1: get round key.
     const auto roundKey = key.GetRoundKey(round);
 
