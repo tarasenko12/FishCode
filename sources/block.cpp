@@ -52,7 +52,7 @@ void fc::Block::Encrypt(const fc::Key& key) noexcept {
       // Store 'index - 1 byte'.
       bytes[index] = temp;
     }
-    
+
     // Step 2: get round key.
     const auto roundKey = key.GetRoundKey(round);
 
@@ -68,10 +68,10 @@ void fc::Block::Decrypt(const fc::Key& key) noexcept {
   for (int round = 11; round >= 0; round--) {
     // Step 1: get round key.
     const auto roundKey = key.GetRoundKey(round);
-    
+
     // Step 2: xor key.
     for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
-      bytes[index] ^= key[index];
+      bytes[index] ^= roundKey[index];
     }
 
     // Step 3: swap bytes.

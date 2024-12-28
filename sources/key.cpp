@@ -49,15 +49,15 @@ fc::Key fc::Key::Generate() {
 fc::Key fc::Key::GetRoundKey(const int round) const {
   // Create new empty round key.
   Key newRoundKey;
-  
+
   // Calculate 'magic' number.
   const std::uint8_t magicNumber = 0x4D ^ round;
-  
+
   // Combine key and the 'magic' number.
   for (std::size_t index = 0; index < SIZE; index++) {
     newRoundKey.bytes[index] = bytes[index] ^ magicNumber;
   }
-  
+
   // Return round key.
   return newRoundKey;
 }
@@ -76,7 +76,7 @@ void fc::Key::Encrypt(const fc::Key& anotherKey) noexcept {
       // Store 'index - 1 byte'.
       bytes[index] = temp;
     }
-    
+
     // Step 2: get round key.
     const auto roundKey = anotherKey.GetRoundKey(round);
 
@@ -92,10 +92,10 @@ void fc::Key::Decrypt(const fc::Key& anotherKey) noexcept {
   for (int round = 11; round >= 0; round--) {
     // Step 1: get round key.
     const auto roundKey = anotherKey.GetRoundKey(round);
-    
+
     // Step 2: xor key.
     for (std::size_t index = 0; index < SIZE; index++) {
-      bytes[index] ^= anotherKey.bytes[index];
+      bytes[index] ^= roundKey.bytes[index];
     }
 
     // Step 3: swap bytes.
