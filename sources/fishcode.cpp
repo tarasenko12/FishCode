@@ -25,6 +25,7 @@
 #include <exception>
 #include <iostream>
 #include <wx/button.h>
+#include <wx/filedlg.h>
 #include <wx/frame.h>
 #include <wx/gauge.h>
 #include <wx/menu.h>
@@ -61,7 +62,7 @@ fc::FishCode::FishCode() noexcept
   inputFileLine(nullptr),
   outputFileLine(nullptr),
   inputFileChooser(nullptr),
-  outputFileChooser(nullptr),
+  outputFileSetter(nullptr),
   passwordLine(nullptr),
   progressBar(nullptr),
   encryptButton(nullptr),
@@ -124,7 +125,7 @@ bool fc::FishCode::OnInit() try {
   // Create context for this sizer.
   inputFileLabel = new wxStaticText(frame, wxID_ANY, "Input file:");
   inputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  inputFileChooser = new wxButton(frame, wxID_ANY, "Choose...");
+  inputFileChooser = new wxButton(frame, ID_CHOOSE, "Choose...");
 
   // Configure input file line layout.
   inputFileLine->SetMinSize(fieldSize);
@@ -137,13 +138,13 @@ bool fc::FishCode::OnInit() try {
   // Connect main sizer with this sizer.
   mainSizer->Add(inputFileSizer, 0, wxALL | wxALIGN_CENTER, 0);
 
-  // Create sizer for the input file chooser.
+  // Create sizer for the output file setter.
   outputFileSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create context for this sizer.
   outputFileLabel = new wxStaticText(frame, wxID_ANY, "Output file:");
   outputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  outputFileChooser = new wxButton(frame, wxID_ANY, "Set...");
+  outputFileSetter = new wxButton(frame, ID_SET, "Set...");
 
   // Configure output file line layout.
   outputFileLine->SetMinSize(fieldSize);
@@ -151,7 +152,7 @@ bool fc::FishCode::OnInit() try {
   // Add context to the sizer.
   outputFileSizer->Add(outputFileLabel, 0, wxALL | wxALIGN_CENTER, 10);
   outputFileSizer->Add(outputFileLine, 0, wxALL | wxALIGN_CENTER, 10);
-  outputFileSizer->Add(outputFileChooser, 0, wxALL | wxALIGN_CENTER, 10);
+  outputFileSizer->Add(outputFileSetter, 0, wxALL | wxALIGN_CENTER, 10);
 
   // Connect main sizer with this sizer.
   mainSizer->Add(outputFileSizer, 0, wxALL | wxALIGN_CENTER);
@@ -204,8 +205,8 @@ bool fc::FishCode::OnInit() try {
   buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create main control buttons.
-  encryptButton = new wxButton(frame, wxID_ANY, "Encrypt");
-  decryptButton = new wxButton(frame, wxID_ANY, "Decrypt");
+  encryptButton = new wxButton(frame, ID_ENCRYPT, "Encrypt");
+  decryptButton = new wxButton(frame, ID_DECRYPT, "Decrypt");
 
   // Add buttons to the sizer.
   buttonsSizer->Add(encryptButton, 0, wxALL | wxALIGN_CENTER, 10);
@@ -217,6 +218,12 @@ bool fc::FishCode::OnInit() try {
   // Connect main window (frame) with sizer.
   frame->SetSizerAndFit(mainSizer);
 
+  // Configure event handlers.
+  inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, ID_CHOOSE);
+  outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, ID_SET);
+  encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, ID_ENCRYPT);
+  decryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnDecrypt, this, ID_DECRYPT);
+
   // Show the window.
   frame->Show();
 
@@ -227,9 +234,55 @@ bool fc::FishCode::OnInit() try {
   wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
 
   // Print error message to the terminal.
-  std::cout << ex.what() << std::endl;
+  std::cerr << ex.what() << std::endl;
 
   // Do not start the application.
   return false;
+}
+
+void fc::FishCode::OnChoose(wxCommandEvent& event) {
+  // Open file selector.
+  const auto filePath = wxFileSelector(
+    "Choose an input file",
+    wxEmptyString,
+    wxEmptyString,
+    wxEmptyString,
+    wxFileSelectorDefaultWildcardStr,
+    wxFD_OPEN,
+    frame
+  );
+
+  // Check if user has chosen the file.
+  if (!filePath.empty()) {
+    // Insert file path to the input file line.
+    inputFileLine->ChangeValue(filePath);
+  }
+}
+
+void fc::FishCode::OnSet(wxCommandEvent& event) {
+  // Open file selector.
+  const auto filePath = wxFileSelector(
+    "Set an output file",
+    wxEmptyString,
+    wxEmptyString,
+    wxEmptyString,
+    wxFileSelectorDefaultWildcardStr,
+    wxFD_SAVE,
+    frame
+  );
+
+  // Check if user has set the file.
+  if (!filePath.empty()) {
+    // Insert file path to the output file line.
+    outputFileLine->ChangeValue(filePath);
+  }
+}
+
+void fc::FishCode::OnEncrypt(wxCommandEvent& event) {
+  // TODO
+}
+
+void fc::FishCode::OnDecrypt(wxCommandEvent& event) {
+  // TODO
 }
 

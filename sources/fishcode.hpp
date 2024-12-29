@@ -37,6 +37,13 @@
 #include <wx/textctrl.h>
 
 namespace fc {
+  enum ControlItemID {
+    ID_CHOOSE = 1,
+    ID_SET,
+    ID_ENCRYPT,
+    ID_DECRYPT
+  };
+
   class FishCode : public wxApp {
   public:
     FishCode() noexcept;
@@ -47,6 +54,10 @@ namespace fc {
     FishCode& operator=(FishCode&& otherFishCode) = delete;
 
     bool OnInit() override;
+    void OnChoose(wxCommandEvent& event);
+    void OnSet(wxCommandEvent& event);
+    void OnEncrypt(wxCommandEvent& event);
+    void OnDecrypt(wxCommandEvent& event);
   private:
     wxFrame* frame;
     wxMenuBar* menuBar;
@@ -64,7 +75,7 @@ namespace fc {
     wxTextCtrl* inputFileLine;
     wxTextCtrl* outputFileLine;
     wxButton* inputFileChooser;
-    wxButton* outputFileChooser;
+    wxButton* outputFileSetter;
     wxTextCtrl* passwordLine;
     wxGauge* progressBar;
     wxButton* encryptButton;
