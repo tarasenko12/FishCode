@@ -21,16 +21,16 @@
 
 const char* fc::InvalidPasswordError::what() const noexcept {
   // Return corresponding error message.
-  return "Error: invalid password!";
+  return "Invalid password!";
 }
 
 const char* fc::InvalidInputFileError::what() const noexcept {
   // Return corresponding error message.
-  return "Error: invalid input file!";
+  return "Invalid input file!";
 }
 
 const char* fc::InvalidOutputFileError::what() const noexcept {
   // Return corresponding error message.
-  return "Error: invalid output file!";
+  return "Invalid output file!";
 }
 

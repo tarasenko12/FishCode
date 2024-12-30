@@ -25,16 +25,7 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <wx/app.h>
-#include <wx/button.h>
-#include <wx/frame.h>
-#include <wx/gauge.h>
-#include <wx/menu.h>
-#include <wx/menuitem.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
-#include <wx/statusbr.h>
-#include <wx/textctrl.h>
+#include <wx/wx.h>
 
 namespace fc {
   enum ControlItemID {
@@ -46,7 +37,7 @@ namespace fc {
 
   class FishCode : public wxApp {
   public:
-    FishCode() noexcept;
+    FishCode() = default;
     FishCode(const FishCode& otherFishCode) = delete;
     FishCode(FishCode&& otherFishCode) = delete;
 
@@ -54,33 +45,35 @@ namespace fc {
     FishCode& operator=(FishCode&& otherFishCode) = delete;
 
     bool OnInit() override;
+    void OnAbout(wxCommandEvent& event);
+    void OnHelp(wxCommandEvent& event);
     void OnChoose(wxCommandEvent& event);
     void OnSet(wxCommandEvent& event);
     void OnEncrypt(wxCommandEvent& event);
     void OnDecrypt(wxCommandEvent& event);
   private:
-    wxFrame* frame;
-    wxMenuBar* menuBar;
-    wxMenu* menuMore;
-    wxMenuItem* menuMoreAbout;
-    wxMenuItem* menuMoreHelp;
-    wxBoxSizer* mainSizer;
-    wxBoxSizer* inputFileSizer;
-    wxBoxSizer* outputFileSizer;
-    wxBoxSizer* passwordSizer;
-    wxBoxSizer* buttonsSizer;
-    wxStaticText* inputFileLabel;
-    wxStaticText* outputFileLabel;
-    wxStaticText* passwordLabel;
-    wxTextCtrl* inputFileLine;
-    wxTextCtrl* outputFileLine;
-    wxButton* inputFileChooser;
-    wxButton* outputFileSetter;
-    wxTextCtrl* passwordLine;
-    wxGauge* progressBar;
-    wxButton* encryptButton;
-    wxButton* decryptButton;
-    wxStatusBar* statusBar;
+    wxFrame* frame = nullptr;
+    wxMenuBar* menuBar = nullptr;
+    wxMenu* menuMore = nullptr;
+    wxMenuItem* menuMoreAbout = nullptr;
+    wxMenuItem* menuMoreHelp = nullptr;
+    wxBoxSizer* mainSizer = nullptr;
+    wxBoxSizer* inputFileSizer = nullptr;
+    wxBoxSizer* outputFileSizer = nullptr;
+    wxBoxSizer* passwordSizer = nullptr;
+    wxBoxSizer* buttonsSizer = nullptr;
+    wxStaticText* inputFileLabel = nullptr;
+    wxStaticText* outputFileLabel = nullptr;
+    wxStaticText* passwordLabel = nullptr;
+    wxTextCtrl* inputFileLine = nullptr;
+    wxTextCtrl* outputFileLine = nullptr;
+    wxButton* inputFileChooser = nullptr;
+    wxButton* outputFileSetter = nullptr;
+    wxTextCtrl* passwordLine = nullptr;
+    wxGauge* progressBar = nullptr;
+    wxButton* encryptButton = nullptr;
+    wxButton* decryptButton = nullptr;
+    wxStatusBar* statusBar = nullptr;
   };
 }
 

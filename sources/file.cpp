@@ -118,12 +118,6 @@ fc::Key fc::InputFile::ReadKey() {
 }
 
 fc::OutputFile::OutputFile(const std::filesystem::path& fsPath) {
-  // Check if path already exists.
-  if (std::filesystem::exists(fsPath)) {
-    // Invalid output file.
-    throw InvalidOutputFileError();
-  }
-
   // Check path to the output file.
   if (fsPath.has_parent_path()) {
     if (!std::filesystem::exists(fsPath.parent_path())) {

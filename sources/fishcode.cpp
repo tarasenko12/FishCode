@@ -23,18 +23,9 @@
 */
 
 #include <exception>
+#include <filesystem>
 #include <iostream>
-#include <wx/button.h>
-#include <wx/filedlg.h>
-#include <wx/frame.h>
-#include <wx/gauge.h>
-#include <wx/menu.h>
-#include <wx/menuitem.h>
-#include <wx/msgdlg.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
-#include <wx/statusbr.h>
-#include <wx/textctrl.h>
+#include <wx/wx.h>
 #include "block.hpp"
 #include "error.hpp"
 #include "file.hpp"
@@ -44,31 +35,6 @@
 
 // This defines the equivalent of main() for the current platform.
 wxIMPLEMENT_APP(fc::FishCode);
-
-fc::FishCode::FishCode() noexcept
-: frame(nullptr),
-  menuBar(nullptr),
-  menuMore(nullptr),
-  menuMoreAbout(nullptr),
-  menuMoreHelp(nullptr),
-  mainSizer(nullptr),
-  inputFileSizer(nullptr),
-  outputFileSizer(nullptr),
-  passwordSizer(nullptr),
-  buttonsSizer(nullptr),
-  inputFileLabel(nullptr),
-  outputFileLabel(nullptr),
-  passwordLabel(nullptr),
-  inputFileLine(nullptr),
-  outputFileLine(nullptr),
-  inputFileChooser(nullptr),
-  outputFileSetter(nullptr),
-  passwordLine(nullptr),
-  progressBar(nullptr),
-  encryptButton(nullptr),
-  decryptButton(nullptr),
-  statusBar(nullptr)
-{}
 
 bool fc::FishCode::OnInit() try {
   // Create the main window (frame).
@@ -195,9 +161,6 @@ bool fc::FishCode::OnInit() try {
   // Configure progress bar size.
   progressBar->SetMinSize(wxSize(400, 15));
 
-  // Hide the progress bar for now.
-  progressBar->Hide();
-
   // Add progress bar to the main sizer.
   mainSizer->Add(progressBar, 0, wxALL | wxALIGN_CENTER, 10);
 
@@ -231,7 +194,7 @@ bool fc::FishCode::OnInit() try {
   return true;
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
+  wxMessageBox(ex.what(), "Fatal error", wxOK | wxICON_ERROR);
 
   // Print error message to the terminal.
   std::cerr << ex.what() << std::endl;
@@ -278,8 +241,88 @@ void fc::FishCode::OnSet(wxCommandEvent& event) {
   }
 }
 
-void fc::FishCode::OnEncrypt(wxCommandEvent& event) {
-  // TODO
+void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
+  // Generate encryption key.
+  auto key = Key::Generate();
+
+  // Get password.
+  const Password password(passwordLine->GetValue().utf8_string());
+
+  // Encrypt the key with password.
+  key.Encrypt(password);
+
+  // Get pathes to input and output files.
+  const std::filesystem::path inputFilePath(
+    inputFileLine->GetValue().utf8_string()
+  );
+  // Get pathes to input and output files.
+  const std::filesystem::path outputFilePath(
+    outputFileLine->GetValue().utf8_string()
+  );
+
+  // Open the input file.
+  InputFile inputFile(inputFilePath, false);
+
+  // Check if pathes are not equivalent.
+  if (std::filesystem::exists(outputFilePath)) {
+    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
+      // Invalid output file.
+      throw InvalidOutputFileError();
+    }
+  }
+
+  // Create the output file.
+  OutputFile outputFile(outputFilePath);
+
+  // Store encrypted key to the output file.
+  outputFile.WriteKey(key);
+
+  // Decrypt the key.
+  key.Decrypt(password);
+
+  // Get number of blocks in the input file.
+  const auto inputFileBlocks = inputFile.GetBlocksNumber();
+
+  // Display new status in the status bar.
+  statusBar->SetStatusText("Encrypting...");
+
+  // Encrypt the input file by blocks.
+  for (std::size_t counter = 0; counter < inputFileBlocks; counter++) {
+    // Read one block from the file.
+    auto block = inputFile.ReadBlock();
+
+    // Encrypt the block.
+    block.Encrypt(key);
+
+    // Store block to the output file.
+    outputFile.WriteBlock(block);
+  }
+
+  // Check if the input file has partial block.
+  if (inputFile.HasPartialBlock()) {
+    // Read partial block.
+    auto block = inputFile.ReadBlock(inputFile.GetPartialBlockSize());
+
+    // Encrypt the block.
+    block.Encrypt(key);
+
+    // Store block to the output file.
+    outputFile.WriteBlock(block);
+  }
+
+  // Show 100% in the progress bar.
+  progressBar->SetValue(100);
+
+  // Display new status in the status bar.
+  statusBar->SetStatusText("All done");
+
+  // TODO: timer
+} catch (const std::exception& ex) {
+  // Display GUI error message.
+  wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
+
+  // Print error message to the terminal.
+  std::cerr << ex.what() << std::endl;
 }
 
 void fc::FishCode::OnDecrypt(wxCommandEvent& event) {
