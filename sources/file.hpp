@@ -34,7 +34,9 @@ namespace fc {
     InputFile(const std::filesystem::path& fsPath, const bool isEncrypted);
     InputFile(const InputFile& anotherFile) = delete;
     InputFile(InputFile&& anotherFile) = default;
-    
+
+    ~InputFile() noexcept = default;
+
     InputFile& operator=(const InputFile& anotherFile) = delete;
     InputFile& operator=(InputFile&& anotherFile) = default;
 
@@ -56,7 +58,9 @@ namespace fc {
     OutputFile(const std::filesystem::path& fsPath);
     OutputFile(const OutputFile& anotherFile) = delete;
     OutputFile(OutputFile&& anotherFile) = default;
-    
+
+    ~OutputFile() noexcept = default;
+
     OutputFile& operator=(const OutputFile& anotherFile) = delete;
     OutputFile& operator=(OutputFile&& anotherFile) = default;
 

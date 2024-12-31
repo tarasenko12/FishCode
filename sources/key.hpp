@@ -28,11 +28,13 @@ namespace fc {
   class Key {
   public:
     static constexpr const std::size_t SIZE = 16;
-    
+
     Key() = default;
     Key(const Key& otherKey) = default;
     Key(Key&& otherKey) = default;
-    
+
+    ~Key() noexcept = default;
+
     Key& operator=(const Key& otherKey) = default;
     Key& operator=(Key&& otherKey) = default;
 

@@ -32,8 +32,13 @@ namespace fc {
     Password(const Password& otherPassword) = default;
     Password(Password&& otherPassword) = default;
 
+    ~Password() noexcept = default;
+
     Password& operator=(const Password& otherPassword) = default;
     Password& operator=(Password&& otherPassword) = default;
+  private:
+    static constexpr const std::size_t MIN_LENGTH = 8;
+    static constexpr const std::size_t MAX_LENGTH = SIZE;
   };
 }
 

@@ -35,6 +35,10 @@ namespace fc {
     ID_DECRYPT
   };
 
+  enum TimerID {
+    ID_READY = ID_DECRYPT + 1
+  };
+
   class FishCode : public wxApp {
   public:
     FishCode() = default;
@@ -44,6 +48,8 @@ namespace fc {
     FishCode& operator=(const FishCode& otherFishCode) = delete;
     FishCode& operator=(FishCode&& otherFishCode) = delete;
 
+    ~FishCode() override = default;
+
     bool OnInit() override;
     void OnAbout(wxCommandEvent& event);
     void OnHelp(wxCommandEvent& event);
@@ -51,6 +57,7 @@ namespace fc {
     void OnSet(wxCommandEvent& event);
     void OnEncrypt(wxCommandEvent& event);
     void OnDecrypt(wxCommandEvent& event);
+    void OnReadyTimer(wxTimerEvent& event);
   private:
     wxFrame* frame = nullptr;
     wxMenuBar* menuBar = nullptr;
@@ -74,6 +81,7 @@ namespace fc {
     wxButton* encryptButton = nullptr;
     wxButton* decryptButton = nullptr;
     wxStatusBar* statusBar = nullptr;
+    wxTimer readyTimer;
   };
 }
 

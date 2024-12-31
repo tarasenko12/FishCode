@@ -27,6 +27,12 @@ fc::Password::Password(const std::string& passwordString) {
   // Get length of the string (in bytes).
   const auto length = passwordString.length();
 
+  // Check password length.
+  if (length < MIN_LENGTH || length > MAX_LENGTH) {
+    // Invalid password.
+    throw InvalidPasswordError();
+  }
+
   // Check password characters.
   for (const auto symbol : passwordString) {
     if (symbol < '!' || symbol > '~') {

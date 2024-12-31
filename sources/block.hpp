@@ -33,7 +33,9 @@ namespace fc {
     Block();
     Block(const Block& otherBlock) = default;
     Block(Block&& otherBlock) = default;
-    
+
+    ~Block() noexcept = default;
+
     Block& operator=(const Block& otherBlock) = default;
     Block& operator=(Block&& otherBlock) = default;
 

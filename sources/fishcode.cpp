@@ -181,11 +181,15 @@ bool fc::FishCode::OnInit() try {
   // Connect main window (frame) with sizer.
   frame->SetSizerAndFit(mainSizer);
 
+  // Configure timer.
+  readyTimer.SetOwner(frame, ID_READY);
+
   // Configure event handlers.
   inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, ID_CHOOSE);
   outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, ID_SET);
   encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, ID_ENCRYPT);
   decryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnDecrypt, this, ID_DECRYPT);
+  frame->Bind(wxEVT_TIMER, &fc::FishCode::OnReadyTimer, this, ID_READY);
 
   // Show the window.
   frame->Show();
@@ -286,8 +290,15 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   // Display new status in the status bar.
   statusBar->SetStatusText("Encrypting...");
 
+  // Count 10% of blocks from the 100%.
+  const auto tenPercents = inputFileBlocks / 10;
+
   // Encrypt the input file by blocks.
-  for (std::size_t counter = 0; counter < inputFileBlocks; counter++) {
+  for (
+    std::size_t blockCounter = 0, percentCounter = 10, progressCounter = 0;
+    blockCounter < inputFileBlocks;
+    blockCounter++, progressCounter++
+  ) {
     // Read one block from the file.
     auto block = inputFile.ReadBlock();
 
@@ -296,6 +307,18 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
 
     // Store block to the output file.
     outputFile.WriteBlock(block);
+
+    // Check if there is valuable progress.
+    if (progressCounter == tenPercents) {
+      // Update the progress bar.
+      progressBar->SetValue(percentCounter);
+
+      // Update percent counter.
+      percentCounter += 10;
+
+      // Set progress counter to zero for the next 10%.
+      progressCounter = 0;
+    }
   }
 
   // Check if the input file has partial block.
@@ -310,22 +333,118 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
     outputFile.WriteBlock(block);
   }
 
-  // Show 100% in the progress bar.
+  // Update the progress bar.
   progressBar->SetValue(100);
 
-  // Display new status in the status bar.
+  // Set new status in the status bar.
   statusBar->SetStatusText("All done");
 
-  // TODO: timer
+  // Start timer to the new status.
+  readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
   wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
-
-  // Print error message to the terminal.
-  std::cerr << ex.what() << std::endl;
 }
 
-void fc::FishCode::OnDecrypt(wxCommandEvent& event) {
-  // TODO
+void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
+  // Get pathes to input and output files.
+  const std::filesystem::path inputFilePath(
+    inputFileLine->GetValue().utf8_string()
+  );
+  // Get pathes to input and output files.
+  const std::filesystem::path outputFilePath(
+    outputFileLine->GetValue().utf8_string()
+  );
+
+  // Open the input file.
+  InputFile inputFile(inputFilePath, true);
+
+  // Check if pathes are not equivalent.
+  if (std::filesystem::exists(outputFilePath)) {
+    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
+      // Invalid output file.
+      throw InvalidOutputFileError();
+    }
+  }
+
+  // Get password.
+  const Password password(passwordLine->GetValue().utf8_string());
+
+  // Read decryption key from the input file.
+  auto key = inputFile.ReadKey();
+
+  // Decrypt key with password.
+  key.Decrypt(password);
+
+  // Create the output file.
+  OutputFile outputFile(outputFilePath);
+
+  // Get number of blocks in the input file.
+  const auto inputFileBlocks = inputFile.GetBlocksNumber();
+
+  // Display new status in the status bar.
+  statusBar->SetStatusText("Decrypting...");
+
+  // Count 10% of blocks from the 100%.
+  const auto tenPercents = inputFileBlocks / 10;
+
+  // Decrypt the input file by blocks.
+  for (
+    std::size_t blockCounter = 0, percentCounter = 10, progressCounter = 0;
+    blockCounter < inputFileBlocks;
+    blockCounter++, progressCounter++
+  ) {
+    // Read one block from the file.
+    auto block = inputFile.ReadBlock();
+
+    // Decrypt the block.
+    block.Decrypt(key);
+
+    // Store block to the output file.
+    outputFile.WriteBlock(block);
+
+    // Check if there is valuable progress.
+    if (progressCounter == tenPercents) {
+      // Update the progress bar.
+      progressBar->SetValue(percentCounter);
+
+      // Update percent counter.
+      percentCounter += 10;
+
+      // Set progress counter to zero for the next 10%.
+      progressCounter = 0;
+    }
+  }
+
+  // Check if the input file has partial block.
+  if (inputFile.HasPartialBlock()) {
+    // Read partial block.
+    auto block = inputFile.ReadBlock(inputFile.GetPartialBlockSize());
+
+    // Decrypt the block.
+    block.Decrypt(key);
+
+    // Store block to the output file.
+    outputFile.WriteBlock(block);
+  }
+
+  // Update the progress bar.
+  progressBar->SetValue(100);
+
+  // Set new status in the status bar.
+  statusBar->SetStatusText("All done");
+
+  // Start timer to the new status.
+  readyTimer.StartOnce(3000);
+} catch (const std::exception& ex) {
+  // Display GUI error message.
+  wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
 }
 
+void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
+  // Set progress bar to the default state.
+  progressBar->SetValue(0);
+
+  // Set default status in the status bar.
+  statusBar->SetStatusText("Ready");
+}

@@ -29,6 +29,8 @@ namespace fc {
     InvalidPasswordError(const InvalidPasswordError& other) = default;
     InvalidPasswordError(InvalidPasswordError&& other) = default;
 
+    ~InvalidPasswordError() noexcept = default;
+
     InvalidPasswordError& operator=(const InvalidPasswordError& other) = default;
     InvalidPasswordError& operator=(InvalidPasswordError&& other) = default;
 
@@ -41,6 +43,8 @@ namespace fc {
     InvalidInputFileError(const InvalidInputFileError& other) = default;
     InvalidInputFileError(InvalidInputFileError&& other) = default;
 
+    ~InvalidInputFileError() noexcept = default;
+
     InvalidInputFileError& operator=(const InvalidInputFileError& other) = default;
     InvalidInputFileError& operator=(InvalidInputFileError&& other) = default;
 
@@ -52,6 +56,8 @@ namespace fc {
     InvalidOutputFileError() noexcept = default;
     InvalidOutputFileError(const InvalidOutputFileError& other) = default;
     InvalidOutputFileError(InvalidOutputFileError&& other) = default;
+
+    ~InvalidOutputFileError() noexcept = default;
 
     InvalidOutputFileError& operator=(const InvalidOutputFileError& other) = default;
     InvalidOutputFileError& operator=(InvalidOutputFileError&& other) = default;
