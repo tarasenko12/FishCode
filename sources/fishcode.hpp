@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -25,7 +25,19 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <wx/wx.h>
+#include <wx/aboutdlg.h>
+#include <wx/app.h>
+#include <wx/button.h>
+#include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/gauge.h>
+#include <wx/menu.h>
+#include <wx/menuitem.h>
+#include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/statusbr.h>
+#include <wx/textctrl.h>
+#include <wx/timer.h>
 
 namespace fc {
   enum ControlItemID {
@@ -64,6 +76,7 @@ namespace fc {
     wxMenu* menuMore = nullptr;
     wxMenuItem* menuMoreAbout = nullptr;
     wxMenuItem* menuMoreHelp = nullptr;
+    wxAboutDialogInfo aboutDialogInfo;
     wxBoxSizer* mainSizer = nullptr;
     wxBoxSizer* inputFileSizer = nullptr;
     wxBoxSizer* outputFileSizer = nullptr;

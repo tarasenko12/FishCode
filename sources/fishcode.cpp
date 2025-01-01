@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -25,7 +25,21 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
-#include <wx/wx.h>
+#include <wx/aboutdlg.h>
+#include <wx/button.h>
+#include <wx/event.h>
+#include <wx/filedlg.h>
+#include <wx/frame.h>
+#include <wx/gauge.h>
+#include <wx/menu.h>
+#include <wx/menuitem.h>
+#include <wx/msgdlg.h>
+#include <wx/sizer.h>
+#include <wx/stattext.h>
+#include <wx/statusbr.h>
+#include <wx/string.h>
+#include <wx/textctrl.h>
+#include <wx/timer.h>
 #include "block.hpp"
 #include "error.hpp"
 #include "file.hpp"
@@ -78,6 +92,19 @@ bool fc::FishCode::OnInit() try {
 
   // Add this status bar to the frame.
   frame->SetStatusBar(statusBar);
+
+  // Configure the about dialog.
+  aboutDialogInfo.SetName("FishCode");
+  aboutDialogInfo.SetVersion("2.0");
+  aboutDialogInfo.SetDescription(
+    "FishCode is a program for encrypting and decrypting files.\n\n"
+    "FishCode is free software: you can redistribute it and/or modify it\n"
+    "under the terms of the GNU General Public License as published by the\n"
+    "Free Software Foundation, either version 3 of the License, or\n"
+    "(at your option) any later version."
+  );
+  aboutDialogInfo.SetCopyright("Copyright (C) 2024-2025 Vitaliy Tarasenko.");
+  aboutDialogInfo.AddDeveloper("Vitaliy Tarasenko");
 
   // Set layout for the fields.
   const wxSize fieldSize(400, 45);
@@ -185,6 +212,8 @@ bool fc::FishCode::OnInit() try {
   readyTimer.SetOwner(frame, ID_READY);
 
   // Configure event handlers.
+  frame->Bind(wxEVT_MENU, &fc::FishCode::OnAbout, this, wxID_ABOUT);
+  frame->Bind(wxEVT_MENU, &fc::FishCode::OnHelp, this, wxID_HELP);
   inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, ID_CHOOSE);
   outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, ID_SET);
   encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, ID_ENCRYPT);
@@ -198,13 +227,28 @@ bool fc::FishCode::OnInit() try {
   return true;
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Fatal error", wxOK | wxICON_ERROR);
+  wxMessageBox(ex.what(), "Fatal error", wxOK | wxCENTRE | wxICON_ERROR);
 
   // Print error message to the terminal.
   std::cerr << ex.what() << std::endl;
 
   // Do not start the application.
   return false;
+}
+
+void fc::FishCode::OnAbout(wxCommandEvent& event) {
+  // Show about box.
+  wxAboutBox(aboutDialogInfo, frame);
+}
+
+void fc::FishCode::OnHelp(wxCommandEvent& event) {
+  // Display a message box with short documentation.
+  wxMessageBox(
+    "HELP_STR",
+    "User documentation",
+    wxOK | wxCENTRE | wxICON_QUESTION,
+    frame
+  );
 }
 
 void fc::FishCode::OnChoose(wxCommandEvent& event) {
@@ -246,6 +290,15 @@ void fc::FishCode::OnSet(wxCommandEvent& event) {
 }
 
 void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
+  // Disable all control items.
+  inputFileLine->Disable();
+  inputFileChooser->Disable();
+  outputFileLine->Disable();
+  outputFileSetter->Disable();
+  passwordLine->Disable();
+  encryptButton->Disable();
+  decryptButton->Disable();
+
   // Generate encryption key.
   auto key = Key::Generate();
 
@@ -343,10 +396,19 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
+  wxMessageBox(ex.what(), "Error", wxOK | wxCENTRE | wxICON_ERROR, frame);
 }
 
 void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
+  // Disable all control items.
+  inputFileLine->Disable();
+  inputFileChooser->Disable();
+  outputFileLine->Disable();
+  outputFileSetter->Disable();
+  passwordLine->Disable();
+  encryptButton->Disable();
+  decryptButton->Disable();
+
   // Get pathes to input and output files.
   const std::filesystem::path inputFilePath(
     inputFileLine->GetValue().utf8_string()
@@ -438,12 +500,21 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Error", wxOK | wxICON_ERROR);
+  wxMessageBox(ex.what(), "Error", wxOK | wxCENTRE | wxICON_ERROR, frame);
 }
 
 void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
   // Set progress bar to the default state.
   progressBar->SetValue(0);
+
+  // Enable all control items.
+  inputFileLine->Enable();
+  inputFileChooser->Enable();
+  outputFileLine->Enable();
+  outputFileSetter->Enable();
+  passwordLine->Enable();
+  encryptButton->Enable();
+  decryptButton->Enable();
 
   // Set default status in the status bar.
   statusBar->SetStatusText("Ready");
