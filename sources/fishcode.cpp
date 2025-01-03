@@ -46,13 +46,14 @@
 #include "fishcode.hpp"
 #include "key.hpp"
 #include "password.hpp"
+#include "strings.hpp"
 
 // This defines the equivalent of main() for the current platform.
 wxIMPLEMENT_APP(fc::FishCode);
 
 bool fc::FishCode::OnInit() try {
   // Create the main window (frame).
-  frame = new wxFrame(nullptr, wxID_ANY, "FishCode");
+  frame = new wxFrame(nullptr, wxID_ANY, STR_NAME0);
 
   // Create a new menu bar for the frame.
   menuBar = new wxMenuBar();
@@ -64,21 +65,11 @@ bool fc::FishCode::OnInit() try {
   menuMore = new wxMenu();
 
   // Initialize "More..." menu items.
-  menuMoreAbout = new wxMenuItem(
-    menuMore,
-    wxID_ABOUT,
-    "About",
-    "Get more information about the program."
-  );
-  menuMoreHelp = new wxMenuItem(
-    menuMore,
-    wxID_HELP,
-    "Help",
-    "Get user documentation."
-  );
+  menuMoreAbout = new wxMenuItem(menuMore, wxID_ABOUT, STR_NAME2, STR_PROMPT0);
+  menuMoreHelp = new wxMenuItem(menuMore, wxID_HELP, STR_NAME3, STR_PROMPT1);
 
   // Append this menu to the menu bar.
-  menuBar->Append(menuMore, "More...");
+  menuBar->Append(menuMore, STR_NAME1);
 
   // Append these items to the "More..." menu.
   menuMore->Append(menuMoreAbout);
@@ -87,24 +78,18 @@ bool fc::FishCode::OnInit() try {
   // Create a new status bar for the frame.
   statusBar = new wxStatusBar(frame);
 
-  // Set status to "Ready".
-  statusBar->SetStatusText("Ready");
+  // Set the default status.
+  statusBar->SetStatusText(STR_STATUS0);
 
   // Add this status bar to the frame.
   frame->SetStatusBar(statusBar);
 
   // Configure the about dialog.
-  aboutDialogInfo.SetName("FishCode");
-  aboutDialogInfo.SetVersion("2.0");
-  aboutDialogInfo.SetDescription(
-    "FishCode is a program for encrypting and decrypting files.\n\n"
-    "FishCode is free software: you can redistribute it and/or modify it\n"
-    "under the terms of the GNU General Public License as published by the\n"
-    "Free Software Foundation, either version 3 of the License, or\n"
-    "(at your option) any later version."
-  );
-  aboutDialogInfo.SetCopyright("Copyright (C) 2024-2025 Vitaliy Tarasenko.");
-  aboutDialogInfo.AddDeveloper("Vitaliy Tarasenko");
+  aboutDialogInfo.SetName(STR_NAME0);
+  aboutDialogInfo.SetVersion(STR_VERSION);
+  aboutDialogInfo.SetDescription(STR_DESCRYPTION);
+  aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
+  aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
 
   // Set layout for the fields.
   const wxSize fieldSize(400, 45);
@@ -116,45 +101,45 @@ bool fc::FishCode::OnInit() try {
   inputFileSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create context for this sizer.
-  inputFileLabel = new wxStaticText(frame, wxID_ANY, "Input file:");
+  inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
   inputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  inputFileChooser = new wxButton(frame, ID_CHOOSE, "Choose...");
+  inputFileChooser = new wxButton(frame, ID_CHOOSE, STR_LABEL2);
 
   // Configure input file line layout.
   inputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  inputFileSizer->Add(inputFileLabel, 0, wxALL | wxALIGN_CENTER, 10);
-  inputFileSizer->Add(inputFileLine, 0, wxALL | wxALIGN_CENTER, 10);
-  inputFileSizer->Add(inputFileChooser, 0, wxALL | wxALIGN_CENTER, 10);
+  inputFileSizer->Add(inputFileLabel, 0, wxALL | wxEXPAND, 10);
+  inputFileSizer->Add(inputFileLine, 0, wxALL | wxEXPAND, 10);
+  inputFileSizer->Add(inputFileChooser, 0, wxALL | wxEXPAND, 10);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(inputFileSizer, 0, wxALL | wxALIGN_CENTER, 0);
+  mainSizer->Add(inputFileSizer, 0, wxALL | wxEXPAND, 0);
 
   // Create sizer for the output file setter.
   outputFileSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create context for this sizer.
-  outputFileLabel = new wxStaticText(frame, wxID_ANY, "Output file:");
+  outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
   outputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  outputFileSetter = new wxButton(frame, ID_SET, "Set...");
+  outputFileSetter = new wxButton(frame, ID_SET, STR_LABEL3);
 
   // Configure output file line layout.
   outputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  outputFileSizer->Add(outputFileLabel, 0, wxALL | wxALIGN_CENTER, 10);
-  outputFileSizer->Add(outputFileLine, 0, wxALL | wxALIGN_CENTER, 10);
-  outputFileSizer->Add(outputFileSetter, 0, wxALL | wxALIGN_CENTER, 10);
+  outputFileSizer->Add(outputFileLabel, 0, wxALL | wxEXPAND, 10);
+  outputFileSizer->Add(outputFileLine, 0, wxALL | wxEXPAND, 10);
+  outputFileSizer->Add(outputFileSetter, 0, wxALL | wxEXPAND, 10);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(outputFileSizer, 0, wxALL | wxALIGN_CENTER);
+  mainSizer->Add(outputFileSizer, 0, wxALL | wxEXPAND);
 
   // Create sizer for password listener.
   passwordSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create context for this sizer.
-  passwordLabel = new wxStaticText(frame, wxID_ANY, "Password:");
+  passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
   passwordLine = new wxTextCtrl(
     frame,
     wxID_ANY,
@@ -169,11 +154,11 @@ bool fc::FishCode::OnInit() try {
   passwordLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  passwordSizer->Add(passwordLabel, 0, wxALL | wxALIGN_CENTER, 10);
-  passwordSizer->Add(passwordLine, 0, wxALL | wxALIGN_CENTER, 10);
+  passwordSizer->Add(passwordLabel, 0, wxALL | wxEXPAND, 10);
+  passwordSizer->Add(passwordLine, 0, wxALL | wxEXPAND, 10);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(passwordSizer, 0, wxALL | wxALIGN_CENTER, 0);
+  mainSizer->Add(passwordSizer, 0, wxALL | wxEXPAND, 0);
 
   // Create a progress bar (0% - 100%).
   progressBar = new wxGauge(
@@ -189,21 +174,21 @@ bool fc::FishCode::OnInit() try {
   progressBar->SetMinSize(wxSize(400, 15));
 
   // Add progress bar to the main sizer.
-  mainSizer->Add(progressBar, 0, wxALL | wxALIGN_CENTER, 10);
+  mainSizer->Add(progressBar, 0, wxALL | wxEXPAND, 10);
 
   // Create sizer for the main control buttons.
   buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
 
   // Create main control buttons.
-  encryptButton = new wxButton(frame, ID_ENCRYPT, "Encrypt");
-  decryptButton = new wxButton(frame, ID_DECRYPT, "Decrypt");
+  encryptButton = new wxButton(frame, ID_ENCRYPT, STR_LABEL5);
+  decryptButton = new wxButton(frame, ID_DECRYPT, STR_LABEL6);
 
   // Add buttons to the sizer.
-  buttonsSizer->Add(encryptButton, 0, wxALL | wxALIGN_CENTER, 10);
-  buttonsSizer->Add(decryptButton, 0, wxALL | wxALIGN_CENTER, 10);
+  buttonsSizer->Add(encryptButton, 0, wxALL | wxEXPAND, 10);
+  buttonsSizer->Add(decryptButton, 0, wxALL | wxEXPAND, 10);
 
   // Connect this sizer to the main sizer.
-  mainSizer->Add(buttonsSizer, 0, wxALL | wxALIGN_CENTER, 0);
+  mainSizer->Add(buttonsSizer, 0, wxALL | wxEXPAND, 0);
 
   // Connect main window (frame) with sizer.
   frame->SetSizerAndFit(mainSizer);
@@ -227,7 +212,7 @@ bool fc::FishCode::OnInit() try {
   return true;
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Fatal error", wxOK | wxCENTRE | wxICON_ERROR);
+  wxMessageBox(ex.what(), STR_FATAL_ERROR, wxOK | wxCENTRE | wxICON_ERROR);
 
   // Print error message to the terminal.
   std::cerr << ex.what() << std::endl;
@@ -244,8 +229,8 @@ void fc::FishCode::OnAbout(wxCommandEvent& event) {
 void fc::FishCode::OnHelp(wxCommandEvent& event) {
   // Display a message box with short documentation.
   wxMessageBox(
-    "HELP_STR",
-    "User documentation",
+    STR_DOCUMENTATION,
+    STR_CAPTION0,
     wxOK | wxCENTRE | wxICON_QUESTION,
     frame
   );
@@ -254,7 +239,7 @@ void fc::FishCode::OnHelp(wxCommandEvent& event) {
 void fc::FishCode::OnChoose(wxCommandEvent& event) {
   // Open file selector.
   const auto filePath = wxFileSelector(
-    "Choose an input file",
+    STR_CAPTION1,
     wxEmptyString,
     wxEmptyString,
     wxEmptyString,
@@ -273,7 +258,7 @@ void fc::FishCode::OnChoose(wxCommandEvent& event) {
 void fc::FishCode::OnSet(wxCommandEvent& event) {
   // Open file selector.
   const auto filePath = wxFileSelector(
-    "Set an output file",
+    STR_CAPTION2,
     wxEmptyString,
     wxEmptyString,
     wxEmptyString,
@@ -290,14 +275,8 @@ void fc::FishCode::OnSet(wxCommandEvent& event) {
 }
 
 void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
-  // Disable all control items.
-  inputFileLine->Disable();
-  inputFileChooser->Disable();
-  outputFileLine->Disable();
-  outputFileSetter->Disable();
-  passwordLine->Disable();
-  encryptButton->Disable();
-  decryptButton->Disable();
+  // Disable controls.
+  DisableControls();
 
   // Generate encryption key.
   auto key = Key::Generate();
@@ -309,23 +288,16 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   key.Encrypt(password);
 
   // Get pathes to input and output files.
-  const std::filesystem::path inputFilePath(
-    inputFileLine->GetValue().utf8_string()
-  );
-  // Get pathes to input and output files.
-  const std::filesystem::path outputFilePath(
-    outputFileLine->GetValue().utf8_string()
-  );
+  const auto inputFilePath = GetInputFilePath();
+  const auto outputFilePath = GetOutputFilePath();
 
   // Open the input file.
   InputFile inputFile(inputFilePath, false);
 
-  // Check if pathes are not equivalent.
-  if (std::filesystem::exists(outputFilePath)) {
-    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
-      // Invalid output file.
-      throw InvalidOutputFileError();
-    }
+  // Check output file path.
+  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
+    // Invalid input file.
+    throw InvalidOutputFileError();
   }
 
   // Create the output file.
@@ -341,7 +313,7 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   const auto inputFileBlocks = inputFile.GetBlocksNumber();
 
   // Display new status in the status bar.
-  statusBar->SetStatusText("Encrypting...");
+  statusBar->SetStatusText(STR_STATUS2);
 
   // Count 10% of blocks from the 100%.
   const auto tenPercents = inputFileBlocks / 10;
@@ -390,43 +362,33 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   progressBar->SetValue(100);
 
   // Set new status in the status bar.
-  statusBar->SetStatusText("All done");
+  statusBar->SetStatusText(STR_STATUS1);
 
   // Start timer to the new status.
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Error", wxOK | wxCENTRE | wxICON_ERROR, frame);
+  wxMessageBox(ex.what(), STR_ERROR, wxOK | wxCENTRE | wxICON_ERROR, frame);
+
+  // Enable controls.
+  EnableControls();
 }
 
 void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
-  // Disable all control items.
-  inputFileLine->Disable();
-  inputFileChooser->Disable();
-  outputFileLine->Disable();
-  outputFileSetter->Disable();
-  passwordLine->Disable();
-  encryptButton->Disable();
-  decryptButton->Disable();
+  // Disable controls.
+  DisableControls();
 
   // Get pathes to input and output files.
-  const std::filesystem::path inputFilePath(
-    inputFileLine->GetValue().utf8_string()
-  );
-  // Get pathes to input and output files.
-  const std::filesystem::path outputFilePath(
-    outputFileLine->GetValue().utf8_string()
-  );
+  const auto inputFilePath = GetInputFilePath();
+  const auto outputFilePath = GetOutputFilePath();
 
   // Open the input file.
   InputFile inputFile(inputFilePath, true);
 
-  // Check if pathes are not equivalent.
-  if (std::filesystem::exists(outputFilePath)) {
-    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
-      // Invalid output file.
-      throw InvalidOutputFileError();
-    }
+  // Check output file path.
+  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
+    // Invalid input file.
+    throw InvalidOutputFileError();
   }
 
   // Get password.
@@ -445,7 +407,7 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   const auto inputFileBlocks = inputFile.GetBlocksNumber();
 
   // Display new status in the status bar.
-  statusBar->SetStatusText("Decrypting...");
+  statusBar->SetStatusText(STR_STATUS3);
 
   // Count 10% of blocks from the 100%.
   const auto tenPercents = inputFileBlocks / 10;
@@ -494,19 +456,30 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   progressBar->SetValue(100);
 
   // Set new status in the status bar.
-  statusBar->SetStatusText("All done");
+  statusBar->SetStatusText(STR_STATUS1);
 
   // Start timer to the new status.
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), "Error", wxOK | wxCENTRE | wxICON_ERROR, frame);
+  wxMessageBox(ex.what(), STR_ERROR, wxOK | wxCENTRE | wxICON_ERROR, frame);
+
+  // Enable controls.
+  EnableControls();
 }
 
 void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
   // Set progress bar to the default state.
   progressBar->SetValue(0);
 
+  // Enable controls.
+  EnableControls();
+
+  // Set default status in the status bar.
+  statusBar->SetStatusText(STR_STATUS0);
+}
+
+void fc::FishCode::EnableControls() {
   // Enable all control items.
   inputFileLine->Enable();
   inputFileChooser->Enable();
@@ -515,7 +488,59 @@ void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
   passwordLine->Enable();
   encryptButton->Enable();
   decryptButton->Enable();
+}
 
-  // Set default status in the status bar.
-  statusBar->SetStatusText("Ready");
+void fc::FishCode::DisableControls() {
+  // Disable all control items.
+  inputFileLine->Disable();
+  inputFileChooser->Disable();
+  outputFileLine->Disable();
+  outputFileSetter->Disable();
+  passwordLine->Disable();
+  encryptButton->Disable();
+  decryptButton->Disable();
+}
+
+std::filesystem::path fc::FishCode::GetInputFilePath() {
+  // Get string from the field.
+  const std::string pathString = inputFileLine->GetValue().utf8_string();
+
+  // Check the string.
+  if (pathString.empty()) {
+    // Invalid path.
+    throw InvalidInputFileError();
+  }
+
+  // Construct the new path object and return it.
+  return std::filesystem::path(pathString);
+}
+
+std::filesystem::path fc::FishCode::GetOutputFilePath() {
+  // Get string from the field.
+  const std::string pathString = outputFileLine->GetValue().utf8_string();
+
+  // Check the string.
+  if (pathString.empty()) {
+    // Invalid path.
+    throw InvalidOutputFileError();
+  }
+
+  // Construct the new path object and return it.
+  return std::filesystem::path(pathString);
+}
+
+bool fc::FishCode::IsValidOutputFile(
+  const std::filesystem::path& inputFilePath,
+  const std::filesystem::path& outputFilePath
+) {
+  // Check if pathes are not equivalent.
+  if (std::filesystem::exists(outputFilePath)) {
+    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
+      // Invalid output file.
+      return false;
+    }
+  }
+
+  // Valid output file.
+  return true;
 }

@@ -25,6 +25,7 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
+#include <filesystem>
 #include <wx/aboutdlg.h>
 #include <wx/app.h>
 #include <wx/button.h>
@@ -60,7 +61,7 @@ namespace fc {
     FishCode& operator=(const FishCode& otherFishCode) = delete;
     FishCode& operator=(FishCode&& otherFishCode) = delete;
 
-    ~FishCode() override = default;
+    ~FishCode() noexcept override = default;
 
     bool OnInit() override;
     void OnAbout(wxCommandEvent& event);
@@ -95,6 +96,15 @@ namespace fc {
     wxButton* decryptButton = nullptr;
     wxStatusBar* statusBar = nullptr;
     wxTimer readyTimer;
+
+    void EnableControls();
+    void DisableControls();
+    std::filesystem::path GetInputFilePath();
+    std::filesystem::path GetOutputFilePath();
+    bool IsValidOutputFile(
+      const std::filesystem::path& inputFilePath,
+      const std::filesystem::path& outputFilePath
+    );
   };
 }
 
