@@ -37,6 +37,7 @@ add_executable(fishcode WIN32
   "sources/key.hpp"
   "sources/password.cpp"
   "sources/password.hpp"
+  "sources/strings.hpp"
 )
 
 # Link external libraries.
