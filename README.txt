@@ -52,6 +52,20 @@ symbols, you can enter the following commands:
   $ cmake --build build
 ********************************************************************************
 User documentation:
-## TODO ##
+________________________________________________________________________________
+  Fishcode interface consists of two main components: the main window and an
+additional menu called "More...".
+  The main window has three input fields ("Input file", "Output file",
+"Password") and four buttons ("Choose...", "Set...", "Encrypt", "Decrypt").
+  The "Input file" and "Output file" fields are for entering the path to the
+corresponding files on the disk. The file path can be either absolute,
+such as "C:\users\user\Downloads\file", or relative, such as "Downloads/file".
+  The "Choose..." and "Set..." buttons are alternative ways to identify
+the relevant files. These buttons bring up the corresponding dialog boxes.
+  The "Encrypt" and "Decrypt" buttons perform the operations corresponding
+to their name. The status of the operation is displayed in the progress bar
+and at the bottom of the window, in the status field.
+  Note: password cannot contain spaces and non-Latin letters and symbols that
+are not part of the ASCII character set.
 ================================================================================
 
