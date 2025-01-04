@@ -31,6 +31,7 @@
 #include <wx/filedlg.h>
 #include <wx/frame.h>
 #include <wx/gauge.h>
+#include <wx/gdicmn.h>
 #include <wx/menu.h>
 #include <wx/menuitem.h>
 #include <wx/msgdlg.h>
@@ -91,14 +92,29 @@ bool fc::FishCode::OnInit() try {
   aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
   aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
 
-  // Set layout for the fields.
-  const wxSize fieldSize(400, 45);
-
   // Initialize new sizer for the main window.
   mainSizer = new wxBoxSizer(wxVERTICAL);
 
+  // Configure grid sizers layout.
+  const wxSize gridLayout(5, 5);
+
+  // Configure sizers (using flags).
+  const auto mainSizerFlags = wxSizerFlags()
+    .Expand()
+    .Border(wxALL, 5);
+  const auto gridSizerFlags = wxSizerFlags()
+    .Expand()
+    .Border(wxALL, 10);
+  const auto gridLabelSizerFlags = wxSizerFlags()
+    .Center()
+    .Right()
+    .Border(wxALL, 2);
+
+  // Set layout for the fields.
+  const wxSize fieldSize(400, 45);
+
   // Create sizer for the input file chooser.
-  inputFileSizer = new wxBoxSizer(wxHORIZONTAL);
+  inputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
 
   // Create context for this sizer.
   inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
@@ -109,15 +125,19 @@ bool fc::FishCode::OnInit() try {
   inputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  inputFileSizer->Add(inputFileLabel, 0, wxALL | wxEXPAND, 10);
-  inputFileSizer->Add(inputFileLine, 0, wxALL | wxEXPAND, 10);
-  inputFileSizer->Add(inputFileChooser, 0, wxALL | wxEXPAND, 10);
+  inputFileSizer->Add(inputFileLabel, gridLabelSizerFlags);
+  inputFileSizer->Add(inputFileLine, gridSizerFlags);
+  inputFileSizer->Add(inputFileChooser, gridSizerFlags);
+
+  // Set growable columns for this sizer.
+  inputFileSizer->AddGrowableCol(1);
+  inputFileSizer->AddGrowableCol(2);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(inputFileSizer, 0, wxALL | wxEXPAND, 0);
+  mainSizer->Add(inputFileSizer, mainSizerFlags);
 
   // Create sizer for the output file setter.
-  outputFileSizer = new wxBoxSizer(wxHORIZONTAL);
+  outputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
 
   // Create context for this sizer.
   outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
@@ -128,15 +148,19 @@ bool fc::FishCode::OnInit() try {
   outputFileLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  outputFileSizer->Add(outputFileLabel, 0, wxALL | wxEXPAND, 10);
-  outputFileSizer->Add(outputFileLine, 0, wxALL | wxEXPAND, 10);
-  outputFileSizer->Add(outputFileSetter, 0, wxALL | wxEXPAND, 10);
+  outputFileSizer->Add(outputFileLabel, gridLabelSizerFlags);
+  outputFileSizer->Add(outputFileLine, gridSizerFlags);
+  outputFileSizer->Add(outputFileSetter, gridSizerFlags);
+
+  // Set growable columns for this sizer.
+  outputFileSizer->AddGrowableCol(1);
+  outputFileSizer->AddGrowableCol(2);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(outputFileSizer, 0, wxALL | wxEXPAND);
+  mainSizer->Add(outputFileSizer, mainSizerFlags);
 
   // Create sizer for password listener.
-  passwordSizer = new wxBoxSizer(wxHORIZONTAL);
+  passwordSizer = new wxFlexGridSizer(1, 2, gridLayout);
 
   // Create context for this sizer.
   passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
@@ -154,11 +178,14 @@ bool fc::FishCode::OnInit() try {
   passwordLine->SetMinSize(fieldSize);
 
   // Add context to the sizer.
-  passwordSizer->Add(passwordLabel, 0, wxALL | wxEXPAND, 10);
-  passwordSizer->Add(passwordLine, 0, wxALL | wxEXPAND, 10);
+  passwordSizer->Add(passwordLabel, gridLabelSizerFlags);
+  passwordSizer->Add(passwordLine, gridSizerFlags);
+
+  // Set growable column for this sizer.
+  passwordSizer->AddGrowableCol(1);
 
   // Connect main sizer with this sizer.
-  mainSizer->Add(passwordSizer, 0, wxALL | wxEXPAND, 0);
+  mainSizer->Add(passwordSizer, mainSizerFlags);
 
   // Create a progress bar (0% - 100%).
   progressBar = new wxGauge(
@@ -174,21 +201,21 @@ bool fc::FishCode::OnInit() try {
   progressBar->SetMinSize(wxSize(400, 15));
 
   // Add progress bar to the main sizer.
-  mainSizer->Add(progressBar, 0, wxALL | wxEXPAND, 10);
+  mainSizer->Add(progressBar, mainSizerFlags);
 
   // Create sizer for the main control buttons.
-  buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonsSizer = new wxGridSizer(1, 2, gridLayout);
 
   // Create main control buttons.
   encryptButton = new wxButton(frame, ID_ENCRYPT, STR_LABEL5);
   decryptButton = new wxButton(frame, ID_DECRYPT, STR_LABEL6);
 
   // Add buttons to the sizer.
-  buttonsSizer->Add(encryptButton, 0, wxALL | wxEXPAND, 10);
-  buttonsSizer->Add(decryptButton, 0, wxALL | wxEXPAND, 10);
+  buttonsSizer->Add(encryptButton, gridSizerFlags);
+  buttonsSizer->Add(decryptButton, gridSizerFlags);
 
   // Connect this sizer to the main sizer.
-  mainSizer->Add(buttonsSizer, 0, wxALL | wxEXPAND, 0);
+  mainSizer->Add(buttonsSizer, mainSizerFlags);
 
   // Connect main window (frame) with sizer.
   frame->SetSizerAndFit(mainSizer);
@@ -212,7 +239,7 @@ bool fc::FishCode::OnInit() try {
   return true;
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), STR_FATAL_ERROR, wxOK | wxCENTRE | wxICON_ERROR);
+  wxMessageBox(ex.what(), STR_CAPTION3, wxOK | wxCENTRE | wxICON_ERROR);
 
   // Print error message to the terminal.
   std::cerr << ex.what() << std::endl;
@@ -368,7 +395,7 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), STR_ERROR, wxOK | wxCENTRE | wxICON_ERROR, frame);
+  wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
 
   // Enable controls.
   EnableControls();
@@ -462,7 +489,7 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   readyTimer.StartOnce(3000);
 } catch (const std::exception& ex) {
   // Display GUI error message.
-  wxMessageBox(ex.what(), STR_ERROR, wxOK | wxCENTRE | wxICON_ERROR, frame);
+  wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
 
   // Enable controls.
   EnableControls();
