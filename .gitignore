@@ -2,5 +2,6 @@
 .vs
 .vscode
 build
+out
 tests
 
