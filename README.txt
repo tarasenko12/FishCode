@@ -10,7 +10,7 @@ custom algorithm (described below). The program works with files as byte
 arrays, so the file type has no effect on the result, and therefore can
 encrypt videos, images and text files using the same algorithm.
   The program works with 128-bit data blocks and a 128-bit key. File encryption
-and decryption is carried out in 10 rounds. The file is encrypted in blocks
+and decryption is carried out in 12 rounds. The file is encrypted in blocks
 up to 128 bits (16 bytes). A unique key is generated for each round, this key
 is derived from the main key.
   Each round of encryption has the following sequence of actions:
