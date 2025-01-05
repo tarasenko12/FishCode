@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -43,7 +43,7 @@ namespace fc {
     std::size_t GetBlocksNumber() const noexcept;
     std::size_t GetPartialBlockSize() const noexcept;
     bool HasPartialBlock() const noexcept;
-    Block ReadBlock(const std::size_t bytesToRead = Block::SIZE);
+    Block ReadBlock(const std::size_t bytesToRead = Block::CAPACITY);
     Key ReadKey();
   private:
     std::ifstream stream;

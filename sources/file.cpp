@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -59,10 +59,10 @@ fc::InputFile::InputFile(
   stream.seekg(std::ios::beg);
 
   // Count number of blocks in the file.
-  blocksNumber = fileSize / Block::SIZE;
+  blocksNumber = fileSize / Block::CAPACITY;
 
   // Calculate partial block size.
-  partialBlockSize = fileSize % Block::SIZE;
+  partialBlockSize = fileSize % Block::CAPACITY;
 
   // Check if file contains partial block.
   if (partialBlockSize != 0) {

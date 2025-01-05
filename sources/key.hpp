@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -28,6 +28,8 @@ namespace fc {
   class Key {
   public:
     static constexpr const std::size_t SIZE = 16;
+
+    static Key Generate();
 
     Key() = default;
     Key(const Key& otherKey) = default;
@@ -65,8 +67,6 @@ namespace fc {
       // Call corresponding std::array method.
       return bytes.end();
     }
-
-    static Key Generate();
 
     Key GetRoundKey(const int round) const;
     void Encrypt(const Key& anotherKey) noexcept;

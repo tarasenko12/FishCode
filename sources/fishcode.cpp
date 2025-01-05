@@ -25,6 +25,7 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
 #include <wx/aboutdlg.h>
 #include <wx/button.h>
 #include <wx/event.h>
@@ -305,6 +306,25 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   // Disable controls.
   DisableControls();
 
+  // Display new status in the status bar.
+  statusBar->SetStatusText(STR_STATUS2);
+
+  // Get pathes to input and output files.
+  const auto inputFilePath = GetFilePath(inputFileLine);
+  const auto outputFilePath = GetFilePath(outputFileLine);
+
+  // Check output file path.
+  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
+    // Invalid output file.
+    throw InvalidOutputFileError();
+  }
+
+  // Open the input file.
+  InputFile inputFile(inputFilePath, false);
+
+  // Create the output file.
+  OutputFile outputFile(outputFilePath);
+
   // Generate encryption key.
   auto key = Key::Generate();
 
@@ -314,22 +334,6 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   // Encrypt the key with password.
   key.Encrypt(password);
 
-  // Get pathes to input and output files.
-  const auto inputFilePath = GetInputFilePath();
-  const auto outputFilePath = GetOutputFilePath();
-
-  // Open the input file.
-  InputFile inputFile(inputFilePath, false);
-
-  // Check output file path.
-  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
-    // Invalid input file.
-    throw InvalidOutputFileError();
-  }
-
-  // Create the output file.
-  OutputFile outputFile(outputFilePath);
-
   // Store encrypted key to the output file.
   outputFile.WriteKey(key);
 
@@ -338,9 +342,6 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
 
   // Get number of blocks in the input file.
   const auto inputFileBlocks = inputFile.GetBlocksNumber();
-
-  // Display new status in the status bar.
-  statusBar->SetStatusText(STR_STATUS2);
 
   // Count 10% of blocks from the 100%.
   const auto tenPercents = inputFileBlocks / 10;
@@ -397,44 +398,47 @@ void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
   // Display GUI error message.
   wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
 
+  // Set progress bar to the default state.
+  progressBar->SetValue(0);
+
   // Enable controls.
   EnableControls();
+
+  // Set default status in the status bar.
+  statusBar->SetStatusText(STR_STATUS0);
 }
 
 void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   // Disable controls.
   DisableControls();
 
+  // Display new status in the status bar.
+  statusBar->SetStatusText(STR_STATUS3);
+
   // Get pathes to input and output files.
-  const auto inputFilePath = GetInputFilePath();
-  const auto outputFilePath = GetOutputFilePath();
+  const auto inputFilePath = GetFilePath(inputFileLine);
+  const auto outputFilePath = GetFilePath(outputFileLine);
+
+  // Check output file path.
+  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
+    // Invalid output file.
+    throw InvalidOutputFileError();
+  }
 
   // Open the input file.
   InputFile inputFile(inputFilePath, true);
 
-  // Check output file path.
-  if (!IsValidOutputFile(inputFilePath, outputFilePath)) {
-    // Invalid input file.
-    throw InvalidOutputFileError();
-  }
-
-  // Get password.
-  const Password password(passwordLine->GetValue().utf8_string());
-
-  // Read decryption key from the input file.
-  auto key = inputFile.ReadKey();
-
-  // Decrypt key with password.
-  key.Decrypt(password);
-
   // Create the output file.
   OutputFile outputFile(outputFilePath);
 
+  // Read encryption key from the input file.
+  auto key = inputFile.ReadKey();
+
+  // Get password and decrypt the key.
+  key.Decrypt(Password(passwordLine->GetValue().utf8_string()));
+
   // Get number of blocks in the input file.
   const auto inputFileBlocks = inputFile.GetBlocksNumber();
-
-  // Display new status in the status bar.
-  statusBar->SetStatusText(STR_STATUS3);
 
   // Count 10% of blocks from the 100%.
   const auto tenPercents = inputFileBlocks / 10;
@@ -491,8 +495,14 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
   // Display GUI error message.
   wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
 
+  // Set progress bar to the default state.
+  progressBar->SetValue(0);
+
   // Enable controls.
   EnableControls();
+
+  // Set default status in the status bar.
+  statusBar->SetStatusText(STR_STATUS0);
 }
 
 void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
@@ -528,32 +538,27 @@ void fc::FishCode::DisableControls() {
   decryptButton->Disable();
 }
 
-std::filesystem::path fc::FishCode::GetInputFilePath() {
-  // Get string from the field.
-  const std::string pathString = inputFileLine->GetValue().utf8_string();
+std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* fileLine) {
+  if (fileLine) {
+    // Get string from the field.
+    const std::string pathString = fileLine->GetValue().utf8_string();
 
-  // Check the string.
-  if (pathString.empty()) {
-    // Invalid path.
-    throw InvalidInputFileError();
+    // Check the string.
+    if (pathString.empty()) {
+      // Invalid path.
+      if (fileLine == inputFileLine) {
+        throw InvalidInputFileError();
+      } else {
+        throw InvalidOutputFileError();
+      }
+    }
+
+    // Construct the new path object and return it.
+    return std::filesystem::path(pathString);
+  } else {
+    // Invalid file line pointer.
+    throw std::invalid_argument("Invalid pointer for GetFilePath()!");
   }
-
-  // Construct the new path object and return it.
-  return std::filesystem::path(pathString);
-}
-
-std::filesystem::path fc::FishCode::GetOutputFilePath() {
-  // Get string from the field.
-  const std::string pathString = outputFileLine->GetValue().utf8_string();
-
-  // Check the string.
-  if (pathString.empty()) {
-    // Invalid path.
-    throw InvalidOutputFileError();
-  }
-
-  // Construct the new path object and return it.
-  return std::filesystem::path(pathString);
 }
 
 bool fc::FishCode::IsValidOutputFile(

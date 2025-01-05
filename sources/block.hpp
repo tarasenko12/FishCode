@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2024-2025 Vitaliy Tarasenko.
 **
 ** This file is part of FishCode.
 **
@@ -28,7 +28,7 @@
 namespace fc {
   class Block {
   public:
-    static constexpr const std::size_t SIZE = 16;
+    static constexpr const std::size_t CAPACITY = 16;
 
     Block();
     Block(const Block& otherBlock) = default;
@@ -49,7 +49,11 @@ namespace fc {
       return bytes.end();
     }
 
-    void PushByte(const std::uint8_t byte);
+    inline void PushByte(const std::uint8_t byte) {
+      // Store one byte to the vector.
+      bytes.push_back(byte);
+    }
+
     void Encrypt(const Key& key) noexcept;
     void Decrypt(const Key& key) noexcept;
   private:

@@ -99,8 +99,7 @@ namespace fc {
 
     void EnableControls();
     void DisableControls();
-    std::filesystem::path GetInputFilePath();
-    std::filesystem::path GetOutputFilePath();
+    std::filesystem::path GetFilePath(wxTextCtrl* fileLine);
     bool IsValidOutputFile(
       const std::filesystem::path& inputFilePath,
       const std::filesystem::path& outputFilePath
