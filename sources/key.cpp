@@ -63,8 +63,8 @@ fc::Key fc::Key::GetRoundKey(const int round) const {
 }
 
 void fc::Key::Encrypt(const fc::Key& anotherKey) noexcept {
-  // Encrypt key within 12 rounds.
-  for (int round = 0; round < 12; round++) {
+  // Encrypt key within 15 rounds.
+  for (int round = 0; round < 15; round++) {
     // Step 1: swap bytes.
     for (std::size_t index = 1; index < SIZE; index += 2) {
       // Copy 'index - 1 byte' to the temporary storage.
@@ -88,8 +88,8 @@ void fc::Key::Encrypt(const fc::Key& anotherKey) noexcept {
 }
 
 void fc::Key::Decrypt(const fc::Key& anotherKey) noexcept {
-  // Decrypt key within 12 rounds.
-  for (int round = 11; round >= 0; round--) {
+  // Decrypt key within 15 rounds.
+  for (int round = 14; round >= 0; round--) {
     // Step 1: get round key.
     const auto roundKey = anotherKey.GetRoundKey(round);
 

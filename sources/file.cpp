@@ -58,11 +58,20 @@ fc::InputFile::InputFile(
   // Rewind the stream.
   stream.seekg(std::ios::beg);
 
-  // Count number of blocks in the file.
-  blocksNumber = fileSize / Block::CAPACITY;
+  // Obtain information about the file.
+  if (isEncrypted) {
+    // Count number of blocks in the encrypted file.
+    blocksNumber = (fileSize - Key::SIZE) / Block::CAPACITY;
 
-  // Calculate partial block size.
-  partialBlockSize = fileSize % Block::CAPACITY;
+    // Calculate partial block size.
+    partialBlockSize = (fileSize - Key::SIZE) % Block::CAPACITY;
+  } else {
+    // Count number of blocks in the plaintext file.
+    blocksNumber = fileSize / Block::CAPACITY;
+
+    // Calculate partial block size.
+    partialBlockSize = fileSize % Block::CAPACITY;
+  }
 
   // Check if file contains partial block.
   if (partialBlockSize != 0) {
