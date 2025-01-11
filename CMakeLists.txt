@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.20)
 # It is C++ project.
 project(FishCode CXX)
 
-# It is FishCode (fishcode) v2.0.
-set(CMAKE_PROJECT_VERSION_MAJOR 2)
+# It is FishCode (fishcode) v1.0.
+set(CMAKE_PROJECT_VERSION_MAJOR 1)
 set(CMAKE_PROJECT_VERSION_MINOR 0)
 
 # The project requires C++20 standard.
