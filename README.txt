@@ -35,21 +35,45 @@ the master key and decrypt the file without entering the password.
 ********************************************************************************
 System requirements:
 ________________________________________________________________________________
-## TODO ##
+  The FishCode program is a cross-platform application, but primarily it is
+oriented to work on three platforms: Windows, Linux and Mac OS. This program
+is as minimalistic as possible and can successfully run on both powerful and
+weak computers. The recommended hardware is the same as for modern versions
+of Windows (10, 11), Mac OS (v11 and above), and Linux (Ubuntu 22.04 and
+later, Fedora 38, etc.).
+  Compiling the program requires a modern C++ compiler that supports at least
+C++20. In addition to the compiler, you also need the following build
+systems: CMake (version 3.20 or later) and Ninja (almost any version).
+wxWidgets library (version 3.0 or later) is also required. On Linux, this
+library (wxGTK) can be installed from the official repositories of your
+distribution. For Windows (wxMSW) and Mac OS (wxOSX/Cocoa), it is recommended
+to compile this library by yourself (https://www.wxwidgets.org/downloads/).
+You can find the system requirements for the wxWidgets compilation on the
+official website of this project:
+(https://docs.wxwidgets.org/3.2/page_introduction.html).
 ********************************************************************************
 Build instructions:
 ________________________________________________________________________________
-  For a normal build of the program, you need to enter the following
-commands:
+  To build the program, you need to enter the following commands:
   $ cmake -B build -D CMAKE_BUILD_TYPE=Release -G Ninja
   $ cmake --build build
-  After the compilation process is complete, the executable file will be in
+  After the compilation process is completed, the executable file will be in
 the "build" directory.
 ********************************************************************************
   If for some reason you want to compile the program with the debugging
 symbols, you can enter the following commands:
   $ cmake -B build -D CMAKE_BUILD_TYPE=Debug -G Ninja
   $ cmake --build build
+********************************************************************************
+  The compilation of the program on Windows or Mac OS is carried out in two
+stages. At the first stage, you need to build the wxWidgets library. For more
+detailed information on this matter, read the official documentation
+for wxWidgets.
+  Windows: https://docs.wxwidgets.org/3.2/plat_msw_install.html
+  Mac OS: https://docs.wxwidgets.org/3.2/plat_osx_install.html
+  After that, the second stage, at which the program itself is built using the
+prepared on the previous step wxWidgets library. This step is carried out
+similarly to build on Linux.
 ********************************************************************************
 User documentation:
 ________________________________________________________________________________
