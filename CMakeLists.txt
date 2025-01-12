@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Find wxWidgets.
-find_package(wxWidgets REQUIRED COMPONENTS base core net)
+find_package(wxWidgets REQUIRED COMPONENTS core base)
 
 # Configure wxWidgets package.
 if(wxWidgets_USE_FILE)
