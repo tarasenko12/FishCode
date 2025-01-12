@@ -34,7 +34,6 @@
 #include <wx/gauge.h>
 #include <wx/gdicmn.h>
 #include <wx/menu.h>
-#include <wx/menuitem.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -60,22 +59,18 @@ bool fc::FishCode::OnInit() try {
   // Create a new menu bar for the frame.
   menuBar = new wxMenuBar();
 
-  // Connect menu bar to the frame.
-  frame->SetMenuBar(menuBar);
-
   // Initialize menu bar menu(s).
   menuMore = new wxMenu();
 
-  // Initialize "More..." menu items.
-  menuMoreAbout = new wxMenuItem(menuMore, wxID_ABOUT, STR_NAME2, STR_PROMPT0);
-  menuMoreHelp = new wxMenuItem(menuMore, wxID_HELP, STR_NAME3, STR_PROMPT1);
+  // Initialize menuMore items and append them to the menu.
+  menuMore->Append(wxID_ABOUT, STR_NAME2, STR_PROMPT0);
+  menuMore->Append(wxID_HELP, STR_NAME3, STR_PROMPT1);
 
-  // Append this menu to the menu bar.
+  // Append menu(s) to the menu bar.
   menuBar->Append(menuMore, STR_NAME1);
 
-  // Append these items to the "More..." menu.
-  menuMore->Append(menuMoreAbout);
-  menuMore->Append(menuMoreHelp);
+  // Connect menu bar to the frame.
+  frame->SetMenuBar(menuBar);
 
   // Create a new status bar for the frame.
   statusBar = new wxStatusBar(frame);

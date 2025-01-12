@@ -33,7 +33,6 @@
 #include <wx/frame.h>
 #include <wx/gauge.h>
 #include <wx/menu.h>
-#include <wx/menuitem.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/statusbr.h>
@@ -75,8 +74,6 @@ namespace fc {
     wxFrame* frame = nullptr;
     wxMenuBar* menuBar = nullptr;
     wxMenu* menuMore = nullptr;
-    wxMenuItem* menuMoreAbout = nullptr;
-    wxMenuItem* menuMoreHelp = nullptr;
     wxStatusBar* statusBar = nullptr;
     wxAboutDialogInfo aboutDialogInfo;
     wxBoxSizer* mainSizer = nullptr;
