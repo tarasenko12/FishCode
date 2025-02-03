@@ -4,10 +4,9 @@ cmake_minimum_required(VERSION 3.20)
 # It is C++ project.
 project(FishCode CXX)
 
-# It is FishCode (fishcode) v1.0.0.
-set(CMAKE_PROJECT_VERSION_MAJOR 1)
-set(CMAKE_PROJECT_VERSION_MINOR 0)
-set(CMAKE_PROJECT_VERSION_PATCH 0)
+# It is FishCode (fishcode) v0.1.
+set(CMAKE_PROJECT_VERSION_MAJOR 0)
+set(CMAKE_PROJECT_VERSION_MINOR 1)
 
 # The project requires C++20 standard.
 set(CMAKE_CXX_STANDARD 20)
@@ -26,19 +25,19 @@ endif()
 
 # The main executable and its dependecies.
 add_executable(fishcode
-    "sources/block.cpp"
-    "sources/block.hpp"
-    "sources/error.cpp"
-    "sources/error.hpp"
-    "sources/file.cpp"
-    "sources/file.hpp"
-    "sources/fishcode.cpp"
-    "sources/fishcode.hpp"
-    "sources/key.cpp"
-    "sources/key.hpp"
-    "sources/password.cpp"
-    "sources/password.hpp"
-    "sources/strings.hpp"
+    "src/block.cpp"
+    "src/block.hpp"
+    "src/error.cpp"
+    "src/error.hpp"
+    "src/file.cpp"
+    "src/file.hpp"
+    "src/fishcode.cpp"
+    "src/fishcode.hpp"
+    "src/key.cpp"
+    "src/key.hpp"
+    "src/password.cpp"
+    "src/password.hpp"
+    "src/strings.hpp"
 )
 
 # Link external libraries.
