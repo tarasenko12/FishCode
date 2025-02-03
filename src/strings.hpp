@@ -52,7 +52,7 @@ namespace fc {
     "that are not part of the ASCII character set.";
   constexpr const auto STR_COPYRIGHT =
     "Copyright (C) 2024-2025 Vitaliy Tarasenko.";
-  constexpr const auto STR_VERSION = "v1.0";
+  constexpr const auto STR_VERSION = "v0.1";
   constexpr const auto STR_DEVELOPER = "Vitaliy Tarasenko";
   constexpr const auto STR_CAPTION0 = "User documentation";
   constexpr const auto STR_CAPTION1 = "Choose an input file";
