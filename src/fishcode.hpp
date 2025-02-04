@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024-2025 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -25,10 +25,8 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <atomic>
 #include <filesystem>
 #include <thread>
-#include <cstddef>
 #include <wx/aboutdlg.h>
 #include <wx/app.h>
 #include <wx/button.h>
@@ -41,107 +39,65 @@
 #include <wx/statusbr.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
-#include "file.hpp"
-#include "key.hpp"
-#include "password.hpp"
+#include "events.hpp"
+#include "task.hpp"
 
 namespace fc {
-  enum ControlItemID {
-    ID_CHOOSE = 1,
-    ID_SET,
-    ID_ENCRYPT,
-    ID_DECRYPT,
-    ID_CANCEL
-  };
+    class FishCode : public wxApp {
+    public:
+        FishCode();
+        FishCode(const FishCode& otherFishCode) = delete;
+        FishCode(FishCode&& otherFishCode) = delete;
 
-  enum TimerID {
-    ID_READY = ID_CANCEL + 1
-  };
+        FishCode& operator=(const FishCode& otherFishCode) = delete;
+        FishCode& operator=(FishCode&& otherFishCode) = delete;
 
-  enum UpdateEventID {
-    ID_UPDATE_PROGRESS = ID_READY + 1,
-    ID_UPDATE_DONE
-  };
+        ~FishCode() noexcept override = default;
 
-  class FishCode : public wxApp {
-  public:
-    struct Data {
-      InputFile inputFile;
-      OutputFile outputFile;
-      Password password;
-      Key key;
+        bool OnInit() override;
+        int OnExit() override;
+    private:
+        std::thread taskThread;
+        wxFrame* frame;
+        wxMenuBar* menuBar;
+        wxMenu* menuMore;
+        wxStatusBar* statusBar;
+        wxAboutDialogInfo aboutDialogInfo;
+        wxBoxSizer* mainSizer;
+        wxFlexGridSizer* inputFileSizer;
+        wxFlexGridSizer* outputFileSizer;
+        wxFlexGridSizer* passwordSizer;
+        wxGridSizer* buttonsSizer;
+        wxStaticText* inputFileLabel;
+        wxStaticText* outputFileLabel;
+        wxStaticText* passwordLabel;
+        wxTextCtrl* inputFileLine;
+        wxTextCtrl* outputFileLine;
+        wxTextCtrl* passwordLine;
+        wxButton* inputFileChooser;
+        wxButton* outputFileSetter;
+        wxButton* encryptButton;
+        wxButton* decryptButton;
+        wxButton* cancelButton;
+        wxGauge* progressBar;
+        wxTimer readyTimer;
 
-      Data() = default;
-      Data(const Data& otherData) = delete;
-      Data(Data&& otherData) = default;
+        void OnAbout(wxCommandEvent& event);
+        void OnHelp(wxCommandEvent& event);
+        void OnChoose(wxCommandEvent& event);
+        void OnSet(wxCommandEvent& event);
+        void OnEncrypt(wxCommandEvent& event);
+        void OnDecrypt(wxCommandEvent& event);
+        void OnCancel(wxCommandEvent& event);
+        void OnProgressUpdate(events::UpdateProgress& event);
+        void OnDoneUpdate(events::UpdateDone& event);
+        void OnReadyTimer(wxTimerEvent& event);
 
-      Data& operator=(const Data& otherData) = delete;
-      Data& operator=(Data&& otherData) = default;
+        std::filesystem::path GetFilePath(wxTextCtrl* field);
 
-      ~Data() noexcept = default;
+        void EnableControls();
+        void DisableControls();
     };
-
-    FishCode() = default;
-    FishCode(const FishCode& otherFishCode) = delete;
-    FishCode(FishCode&& otherFishCode) = delete;
-
-    FishCode& operator=(const FishCode& otherFishCode) = delete;
-    FishCode& operator=(FishCode&& otherFishCode) = delete;
-
-    ~FishCode() noexcept override = default;
-
-    bool OnInit() override;
-    int OnExit() override;
-  private:
-    std::thread taskThread;
-    std::atomic<bool> shouldCancel = false;
-    std::atomic<int> progress = 0;
-    wxFrame* frame = nullptr;
-    wxMenuBar* menuBar = nullptr;
-    wxMenu* menuMore = nullptr;
-    wxStatusBar* statusBar = nullptr;
-    wxAboutDialogInfo aboutDialogInfo;
-    wxBoxSizer* mainSizer = nullptr;
-    wxFlexGridSizer* inputFileSizer = nullptr;
-    wxFlexGridSizer* outputFileSizer = nullptr;
-    wxFlexGridSizer* passwordSizer = nullptr;
-    wxGridSizer* buttonsSizer = nullptr;
-    wxStaticText* inputFileLabel = nullptr;
-    wxStaticText* outputFileLabel = nullptr;
-    wxStaticText* passwordLabel = nullptr;
-    wxTextCtrl* inputFileLine = nullptr;
-    wxTextCtrl* outputFileLine = nullptr;
-    wxTextCtrl* passwordLine = nullptr;
-    wxButton* inputFileChooser = nullptr;
-    wxButton* outputFileSetter = nullptr;
-    wxButton* encryptButton = nullptr;
-    wxButton* decryptButton = nullptr;
-    wxButton* cancelButton = nullptr;
-    wxGauge* progressBar = nullptr;
-    wxTimer readyTimer;
-
-    void OnAbout(wxCommandEvent& event);
-    void OnHelp(wxCommandEvent& event);
-    void OnChoose(wxCommandEvent& event);
-    void OnSet(wxCommandEvent& event);
-    void OnEncrypt(wxCommandEvent& event);
-    void OnDecrypt(wxCommandEvent& event);
-    void OnCancel(wxCommandEvent& event);
-    void OnProgressUpdate(wxCommandEvent& event);
-    void OnDoneUpdate(wxCommandEvent& event);
-    void OnReadyTimer(wxTimerEvent& event);
-
-    void Encrypt(wxFrame* sink, Data&& data);
-    void Decrypt(wxFrame* sink, Data&& data);
-    void EnableControls();
-    void DisableControls();
-    std::filesystem::path GetFilePath(wxTextCtrl* fileLine);
-    bool IsValidOutputFile(
-      const std::filesystem::path& inputFilePath,
-      const std::filesystem::path& outputFilePath
-    );
-  };
 }
 
 #endif // FISHCODE_HPP
-
