@@ -33,8 +33,6 @@ add_executable(fishcode
     "src/file.hpp"
     "src/fishcode.cpp"
     "src/fishcode.hpp"
-    "src/key.cpp"
-    "src/key.hpp"
     "src/password.cpp"
     "src/password.hpp"
     "src/strings.hpp"
@@ -42,4 +40,3 @@ add_executable(fishcode
 
 # Link external libraries.
 target_link_libraries(fishcode ${wxWidgets_LIBRARIES})
-
