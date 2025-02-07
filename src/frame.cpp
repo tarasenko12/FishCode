@@ -22,20 +22,12 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <wx/event.h>
+#include <wx/frame.h>
 #include "events.hpp"
+#include "frame.hpp"
+#include "strings.hpp"
 
-// Define events.
-wxDEFINE_EVENT(fc::events::EVT_UPDATE_DONE, fc::events::UpdateDone);
-wxDEFINE_EVENT(fc::events::EVT_UPDATE_PROGRESS, fc::events::UpdateProgress);
+fc::Frame::Frame()
+: wxFrame(nullptr, fc::events::ID_FRAME, STR_NAME0) {
 
-fc::events::UpdateDone::UpdateDone(const int newID)
-: wxEvent(newID, fc::events::EVT_UPDATE_DONE) {
-
-}
-
-fc::events::UpdateProgress::UpdateProgress(const int newID, const int newProgress)
-: wxEvent(newID, fc::events::EVT_UPDATE_PROGRESS) {
-    // Set new progress value.
-    progress = newProgress;
 }

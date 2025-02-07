@@ -22,20 +22,23 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <wx/event.h>
-#include "events.hpp"
+#ifndef FISHCODE_FRAME_HPP
+#define FISHCODE_FRAME_HPP
 
-// Define events.
-wxDEFINE_EVENT(fc::events::EVT_UPDATE_DONE, fc::events::UpdateDone);
-wxDEFINE_EVENT(fc::events::EVT_UPDATE_PROGRESS, fc::events::UpdateProgress);
+#include <wx/frame.h>
 
-fc::events::UpdateDone::UpdateDone(const int newID)
-: wxEvent(newID, fc::events::EVT_UPDATE_DONE) {
+namespace fc {
+    class Frame : public wxFrame {
+    public:
+        Frame();
+        Frame(const Frame& otherFrame) = delete;
+        Frame(Frame&& otherFrame) = delete;
 
+        Frame& operator=(const Frame& otherFrame) = delete;
+        Frame& operator=(Frame&& otherFrame) = delete;
+
+        ~Frame() noexcept override = default;
+    };
 }
 
-fc::events::UpdateProgress::UpdateProgress(const int newID, const int newProgress)
-: wxEvent(newID, fc::events::EVT_UPDATE_PROGRESS) {
-    // Set new progress value.
-    progress = newProgress;
-}
+#endif // FISHCODE_FRAME_HPP
