@@ -22,25 +22,20 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_HPP
-#define FISHCODE_HPP
+#include <wx/gdicmn.h>
+#include <wx/string.h>
+#include <wx/textctrl.h>
+#include <wx/window.h>
+#include "field.hpp"
+#include "password.hpp"
 
-#include <wx/app.h>
+fc::Field::Field(wxWindow* parent)
+: wxTextCtrl(parent, wxID_ANY) {
 
-namespace fc {
-    class FishCode : public wxApp {
-    public:
-        FishCode() = default;
-        FishCode(const FishCode& otherFishCode) = delete;
-        FishCode(FishCode&& otherFishCode) = delete;
-
-        FishCode& operator=(const FishCode& otherFishCode) = delete;
-        FishCode& operator=(FishCode&& otherFishCode) = delete;
-
-        ~FishCode() noexcept override = default;
-
-        bool OnInit() override;
-    };
 }
 
-#endif // FISHCODE_HPP
+fc::PasswordField::PasswordField(wxWindow* parent)
+: wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD) {
+    // Set up size limit for the input string.
+    SetMaxLength(Password::SIZE);
+}
