@@ -22,25 +22,12 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_HPP
-#define FISHCODE_HPP
+#include <wx/button.h>
+#include <wx/string.h>
+#include <wx/window.h>
+#include "button.hpp"
 
-#include <wx/app.h>
+fc::Button::Button(wxWindow* parent, const int id, const wxString& label)
+: wxButton(parent, id, label) {
 
-namespace fc {
-    class FishCode : public wxApp {
-    public:
-        FishCode() = default;
-        FishCode(const FishCode& otherFishCode) = delete;
-        FishCode(FishCode&& otherFishCode) = delete;
-
-        FishCode& operator=(const FishCode& otherFishCode) = delete;
-        FishCode& operator=(FishCode&& otherFishCode) = delete;
-
-        ~FishCode() noexcept override = default;
-
-        bool OnInit() override;
-    };
 }
-
-#endif // FISHCODE_HPP
