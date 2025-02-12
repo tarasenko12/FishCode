@@ -23,6 +23,7 @@
 */
 
 #include <exception>
+#include <filesystem>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -34,17 +35,12 @@
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/timer.h>
+#include "error.hpp"
 #include "events.hpp"
 #include "frame.hpp"
 #include "progress.hpp"
 #include "strings.hpp"
 #include "task.hpp"
-
-using std::exception;
-using std::make_unique;
-using std::move;
-using std::thread;
-using std::unique_ptr;
 
 fc::Frame::Frame()
 : wxFrame(nullptr, fc::events::ID_FRAME, STR_NAME0) {
@@ -68,32 +64,34 @@ fc::Frame::Frame()
     // Set the default status text.
     SetStatusText(STR_STATUS0);
 
-    // Initialize new sizer for the main window.
-    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    // Initialize new sizer (box) for the main window.
+    auto boxSizer = new wxBoxSizer(wxVERTICAL);
 
     // Configure grid sizers layout.
     const wxSize gridLayout(5, 5);
 
     // Configure sizers (using flags).
-    const auto mainSizerFlags = wxSizerFlags().Expand().Border(wxALL, 5);
+    const auto boxSizerFlags = wxSizerFlags().Expand().Border(wxALL, 5);
     const auto gridSizerFlags = wxSizerFlags().Expand().Border(wxALL, 10);
     const auto gridLabelSizerFlags = wxSizerFlags().Center().Right().Border(wxALL, 2);
 
     // Set layout for the fields.
     const wxSize fieldSize(400, 45);
 
-    // Configure UI sizers.
-    auto* sizers[] = {
+    // Configure UI (grid) sizers.
+    wxFlexGridSizer* gridSizers[] = {
         new wxFlexGridSizer(1, 3, gridLayout),
         new wxFlexGridSizer(1, 3, gridLayout),
         new wxFlexGridSizer(1, 2, gridLayout),
-        new wxFlexGridSizer(1, 2, gridLayout),
+        new wxFlexGridSizer(1, 2, gridLayout)
     };
-    sizers[0]->AddGrowableCol(1);
-    sizers[0]->AddGrowableCol(2);
-    sizers[1]->AddGrowableCol(1);
-    sizers[1]->AddGrowableCol(2);
-    sizers[2]->AddGrowableCol(1);
+    gridSizers[0]->AddGrowableCol(1);
+    gridSizers[0]->AddGrowableCol(2);
+    gridSizers[1]->AddGrowableCol(1);
+    gridSizers[1]->AddGrowableCol(2);
+    gridSizers[2]->AddGrowableCol(1);
+    gridSizers[3]->AddGrowableCol(0);
+    gridSizers[3]->AddGrowableCol(1);
 
     // Create and configure input fields.
     fields[0] = new Field(this);
@@ -106,39 +104,31 @@ fc::Frame::Frame()
     labels[0] = new Label(this, STR_LABEL0);
     labels[1] = new Label(this, STR_LABEL1);
     labels[2] = new Label(this, STR_LABEL4);
-    sizers[0]->Add(labels[0], gridLabelSizerFlags);
-    sizers[0]->Add(fields[0], gridSizerFlags);
-    sizers[1]->Add(labels[1], gridLabelSizerFlags);
-    sizers[1]->Add(fields[1], gridSizerFlags);
-    sizers[2]->Add(labels[2], gridLabelSizerFlags);
-    sizers[2]->Add(fields[2]], gridSizerFlags);
+    gridSizers[0]->Add(labels[0], gridLabelSizerFlags);
+    gridSizers[0]->Add(fields[0], gridSizerFlags);
+    gridSizers[1]->Add(labels[1], gridLabelSizerFlags);
+    gridSizers[1]->Add(fields[1], gridSizerFlags);
+    gridSizers[2]->Add(labels[2], gridLabelSizerFlags);
+    gridSizers[2]->Add(fields[2], gridSizerFlags);
 
-
-    // Create and configure buttons.
+    // Create buttons.
     buttons[0] = new Button(this, events::ID_CHOOSE, STR_LABEL2);
     buttons[1] = new Button(this, events::ID_SET, STR_LABEL3);
     buttons[2] = new Button(this, events::ID_ENCRYPT, STR_LABEL5);
     buttons[3] = new Button(this, events::ID_DECRYPT, STR_LABEL6);
     buttons[4] = new Button(this, events::ID_CANCEL, STR_LABEL7);
-    sizers[0]->Add(buttons[0], gridSizerFlags);
-    sizers[1]->Add(buttons[1], gridSizerFlags);
-    sizers[3]->Add(buttons[0], gridSizerFlags);
-    sizers[3]->Add(buttons[0], gridSizerFlags);
 
     // Disable "Cancel" button for now.
     buttons[4]->Disable();
 
-    // Add UI sizers (fields) context to the frame (using sizer).
-    mainSizer->Add(sizers[0], mainSizerFlags);
-    mainSizer->Add(sizers[1], mainSizerFlags);
-    mainSizer->Add(sizers[3], mainSizerFlags);
+    // Configure input control buttons.
+    gridSizers[0]->Add(buttons[0], gridSizerFlags);
+    gridSizers[1]->Add(buttons[1], gridSizerFlags);
 
-    // Set up button event handlers.
-    buttons[0]->Bind(wxEVT_BUTTON, &fc::Frame::OnChoose, this, events::ID_CHOOSE);
-    buttons[1]->Bind(wxEVT_BUTTON, &fc::Frame::OnSet, this, events::ID_SET);
-    buttons[2]->Bind(wxEVT_BUTTON, &fc::Frame::OnEncrypt, this, events::ID_ENCRYPT);
-    buttons[3]->Bind(wxEVT_BUTTON, &fc::Frame::OnDecrypt, this, events::ID_DECRYPT);
-    buttons[4]->Bind(wxEVT_BUTTON, &fc::Frame::OnCancel, this, events::ID_CANCEL);
+    // Add grid with input fields and controls to the frame (using sizers).
+    boxSizer->Add(gridSizers[0], boxSizerFlags);
+    boxSizer->Add(gridSizers[1], boxSizerFlags);
+    boxSizer->Add(gridSizers[2], boxSizerFlags);
 
     // Create a progress bar.
     progressBar = new ProgressBar(this);
@@ -147,16 +137,30 @@ fc::Frame::Frame()
     progressBar->Disable();
 
     // Add progress bar to the frame.
-    mainSizer->Add(progressBar, mainSizerFlags);
+    boxSizer->Add(progressBar, boxSizerFlags);
 
-    // Add "Cancel" button to the frame (bottom).
-    mainSizer->Add(buttons[0], gridSizerFlags);
+    // Configure main control buttons.
+    gridSizers[3]->Add(buttons[2], gridSizerFlags);
+    gridSizers[3]->Add(buttons[3], gridSizerFlags);
+
+    // Add main control buttons to the frame (using sizer).
+    boxSizer->Add(gridSizers[3], gridSizerFlags);
+
+    // Configure "Cancel" button.
+    boxSizer->Add(buttons[4], boxSizerFlags);
+
+    // Set up button event handlers.
+    buttons[0]->Bind(wxEVT_BUTTON, &fc::Frame::OnChoose, this, events::ID_CHOOSE);
+    buttons[1]->Bind(wxEVT_BUTTON, &fc::Frame::OnSet, this, events::ID_SET);
+    buttons[2]->Bind(wxEVT_BUTTON, &fc::Frame::OnEncrypt, this, events::ID_ENCRYPT);
+    buttons[3]->Bind(wxEVT_BUTTON, &fc::Frame::OnDecrypt, this, events::ID_DECRYPT);
+    buttons[4]->Bind(wxEVT_BUTTON, &fc::Frame::OnCancel, this, events::ID_CANCEL);
 
     // Connect main window (frame) with its sizer.
-    SetSizerAndFit(mainSizer);
+    SetSizerAndFit(boxSizer);
 
     // Create and configure timer.
-    readyTimer = make_unique<wxTimer>(this, events::ID_READY);
+    readyTimer = std::make_unique<wxTimer>(this, events::ID_READY);
 
     // Configure timer event handler.
     Bind(wxEVT_TIMER, &fc::Frame::OnReadyTimer, this, events::ID_READY);
@@ -164,19 +168,9 @@ fc::Frame::Frame()
     // Set up status update handlers.
     Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_DONE);
     Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_PROGRESS);
-}
 
-void fc::Frame::OnClose(wxCloseEvent& event) {
-    // Abort the task (if it is running).
-    taskShouldCancel = true;
-
-    // Wait for the task termination.
-    if (taskThread->joinable()) {
-        taskThread->join();
-    }
-
-    // Destroy window (frame) and all of its subwindows.
-    Destroy();
+    // Configure frame closing handler.
+    Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::OnClose, this, events::ID_CLOSE);
 }
 
 void fc::Frame::OnAbout(wxCommandEvent& event) {
@@ -200,8 +194,10 @@ void fc::Frame::OnCancel(wxCommandEvent& event) {
     taskShouldCancel = true;
 
     // Wait for the task termination (if there is a task).
-    if (taskThread->joinable()) {
-        taskThread->join();
+    if (taskThread) {
+        if (taskThread->joinable()) {
+            taskThread->join();
+        }
     }
 
     // Disable task abortion.
@@ -233,6 +229,21 @@ void fc::Frame::OnChoose(wxCommandEvent& event) {
     }
 }
 
+void fc::Frame::OnClose(wxCloseEvent& event) {
+    // Abort the task (if it is running).
+    taskShouldCancel = true;
+
+    // Wait for the task termination (if there is a task).
+    if (taskThread) {
+        if (taskThread->joinable()) {
+            taskThread->join();
+        }
+    }
+
+    // Destroy window (frame) and all of its subwindows.
+    Destroy();
+}
+
 void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
     // Set frame to the "processing" mode.
     DisableButtons();
@@ -244,40 +255,38 @@ void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
     SetStatusText(STR_STATUS4);
 
     // Get pathes to input and output files.
-    const auto ifPath = GetIFPathValue();
-    const auto ofPath = GetOFPathValue();
+    const auto ifPath = std::filesystem::path(GetIFPathValue().utf8_string());
+    const auto ofPath = std::filesystem::path(GetOFPathValue().utf8_string());
 
     // Get user password (as string).
-    const auto passwordString = GetPasswordValue();
+    const auto password = GetPasswordValue().utf8_string();
 
     // Check user data.
-    CheckFileIO(ifPath.utf8_string(), ofPath.utf8_string());
-    const auto inputFile = CheckInputFile(ifPath.utf8_string(), true);
-    const auto outputFile = CheckOutputFile(ofPath.utf8_string());
-    const auto password = CheckPassword(password.utf8_string());
+    CheckFileIO(ifPath, ofPath);
+    CheckInputFile(ifPath, true);
+    CheckOutputFile(ofPath);
+    CheckPassword(password);
 
     // Allocate memory for the task.
-    unique_ptr<Task> task;
+    auto task = std::make_unique<Task>();
 
     // Open the input file.
-    task->SetInputFile(inputFile);
+    task->SetInputFile(ifPath);
 
     // Create an output file.
-    task->SetOutputFile(outputFile);
+    task->SetOutputFile(ofPath);
 
     // Store user password.
     task->SetPassword(password);
 
-    // Create new thread for the encryption task.
-    taskThread = make_unique<thread>([this, &task]() {
-        TaskDecrypt(this, move(task));
-    });
+    // Create new thread for the decryption task.
+    taskThread = std::make_unique<std::thread>(TaskDecrypt, this, std::move(task));
 
     // Allow task to run independently.
-    taskThread.detach();
-} catch (const exception& ex) {
+    taskThread->detach();
+} catch (const std::exception& ex) {
     // Send a message about the task abortion.
-    wxPostMessage(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
+    wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
     wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
@@ -286,6 +295,11 @@ void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
 void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
     // Disable "Cancel" button.
     DisableCancelButton();
+
+    // Set new value in the progress bar (100%) if it is not already set.
+    if (progressBar->GetValue() != 100) {
+        progressBar->SetValue(100);
+    }
 
     // Set new status in the status bar.
     SetStatusText(STR_STATUS1);
@@ -302,43 +316,41 @@ void fc::Frame::OnEncrypt(wxCommandEvent& event) try {
     EnableProgressBar();
 
     // Display new status in the status bar.
-    statusBar->SetStatusText(STR_STATUS3);
+    SetStatusText(STR_STATUS3);
 
     // Get pathes to input and output files.
-    const auto ifPath = GetIFPathValue();
-    const auto ofPath = GetOFPathValue();
+    const auto ifPath = std::filesystem::path(GetIFPathValue().utf8_string());
+    const auto ofPath = std::filesystem::path(GetOFPathValue().utf8_string());
 
     // Get user password (as string).
-    const auto password = GetPasswordValue();
+    const auto password = GetPasswordValue().utf8_string();
 
     // Check user data.
-    CheckFileIO(ifPath.utf8_string(), ofPath.utf8_string());
-    const auto inputFile = CheckInputFile(ifPath.utf8_string(), false);
-    const auto outputFile = CheckOutputFile(ofPath.utf8_string());
-    const auto password = CheckPassword(password.utf8_string());
+    CheckFileIO(ifPath, ofPath);
+    CheckInputFile(ifPath, false);
+    CheckOutputFile(ofPath);
+    CheckPassword(password);
 
     // Allocate memory for the task.
-    unique_ptr<Task> task;
+    auto task = std::make_unique<Task>();
 
     // Open the input file.
-    task->SetInputFile(inputFile);
+    task->SetInputFile(ifPath);
 
     // Create an output file.
-    task->SetOutputFile(outputFile);
+    task->SetOutputFile(ofPath);
 
     // Store user password.
     task->SetPassword(password);
 
     // Create new thread for the encryption task.
-    taskThread = make_unique<thread>([this, &task]() {
-        TaskEncrypt(this, move(task));
-    });
+    taskThread = std::make_unique<std::thread>(TaskEncrypt, this, std::move(task));
 
     // Allow task to run independently.
-    taskThread.detach();
-} catch (const exception& ex) {
+    taskThread->detach();
+} catch (const std::exception& ex) {
     // Send a message about the task abortion.
-    wxPostMessage(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
+    wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
     wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
@@ -349,7 +361,7 @@ void fc::Frame::OnHelp(wxCommandEvent& event) {
     wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
 }
 
-void fc::Frame::OnProgressUpdate(fc::events::ProgressUpdate& event) {
+void fc::Frame::OnProgressUpdate(fc::events::UpdateProgress& event) {
     // Set new value in the progress bar.
     progressBar->SetValue(event.GetProgress());
 
@@ -361,7 +373,7 @@ void fc::Frame::OnReadyTimer(wxTimerEvent& event) {
     // Set default status in the status bar.
     SetStatusText(STR_STATUS0);
 
-    // Set progress bar to the default state.
+    // Set progress bar to the default state (0%).
     progressBar->SetValue(0);
 
     // Set frame to the default state.

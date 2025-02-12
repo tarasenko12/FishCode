@@ -19,65 +19,51 @@
 
 #include <filesystem>
 #include <string>
-#include <utility>
-#include "block.hpp"
 #include "error.hpp"
 #include "file.hpp"
+#include "key.hpp"
 #include "password.hpp"
-
-using std::filesystem::equivalent;
-using std::filesystem::exists;
-using std::filesystem::is_regular_file;
-using std::move;
-using std::filesystem::path;
-using std::string;
 
 const char* fc::error::InvalidFileIO::what() const noexcept {
     return "Invalid I/O configuration!";
 }
 
 const char* fc::error::InvalidInputFile::what() const noexcept {
-    return "Invalid I/O configuration!";
+    return "Invalid input file!";
 }
 
 const char* fc::error::InvalidOutputFile::what() const noexcept {
-    return "Invalid I/O configuration!";
+    return "Invalid output file!";
 }
 
 const char* fc::error::InvalidPassword::what() const noexcept {
-    return "Invalid I/O configuration!";
+    return "Invalid password!";
 }
 
-void fc::CheckFileIO(const path& ifPath, const path& ofPath) {
+void fc::CheckFileIO(const std::filesystem::path& ifPath, const std::filesystem::path& ofPath) {
   // Check if pathes are not equivalent.
-  if (exists(ifPath) && exists(ofPath)) {
-    if (equivalent(ifPath, ofPath)) {
+  if (std::filesystem::exists(ifPath) && std::filesystem::exists(ofPath)) {
+    if (std::filesystem::equivalent(ifPath, ofPath)) {
       // Invalid file I/O.
       throw error::InvalidFileIO();
     }
   }
 }
 
-fc::File fc::CheckInputFile(const path& ifPath, const bool isEncrypted) {
+void fc::CheckInputFile(const std::filesystem::path& ifPath, const bool isEncrypted) {
     // Check if it is path to a regular file.
-    if (is_regular_file(ifPath)) {
-        // Open file.
-        const File inputFile(ifPath, isEncrypted);
+    if (std::filesystem::is_regular_file(ifPath)) {
+        // Open the file.
+        const File inputFile(ifPath, FileType::FT_INPUT);
 
         // Check file size.
         if (isEncrypted) {
-            if (inputFile.GetSize() == Block::SIZE + 1) {
-                // OK. Valid. Return file object.
-                return move(inputFile);
-            } else {
+            if (inputFile.GetSize() < Key::SIZE + 1) {
                 // Invalid input file.
                 throw error::InvalidInputFile();
             }
         } else {
-            if (inputFile.GetSize() > 0) {
-                // OK. Valid. Return file object.
-                return move(inputFile);
-            } else {
+            if (inputFile.GetSize() < 1) {
                 // Invalid input file.
                 throw error::InvalidInputFile();
             }
@@ -88,24 +74,24 @@ fc::File fc::CheckInputFile(const path& ifPath, const bool isEncrypted) {
     }
 }
 
-fc::File fc::CheckOutputFile(const path& ofPath) {
+void fc::CheckOutputFile(const std::filesystem::path& ofPath) {
+    // Check if path is not empty.
+    if (ofPath.empty()) {
+        // Invalid output file (no file).
+        throw error::InvalidOutputFile();
+    }
+
     // Check if path points to the existing file.
-    if (exists(ofPath)) {
+    if (std::filesystem::exists(ofPath)) {
         // Check if it is regular file.
-        if (is_regular_file(ofPath)) {
-            // Create file.
-            return File(ofPath);
-        } else {
+        if (!std::filesystem::is_regular_file(ofPath)) {
             // Invalid output file.
             throw error::InvalidOutputFile();
         }
-    } else {
-        // Create file and return it.
-        return File(ofPath);
     }
 }
 
-fc::Password fc::CheckPassword(const string& passwordString) {
+void fc::CheckPassword(const std::string& passwordString) {
     // Check password length.
     if (passwordString.length() < Password::MIN_LENGTH || passwordString.length() > Password::MAX_LENGTH) {
         // Invalid password.
@@ -120,7 +106,4 @@ fc::Password fc::CheckPassword(const string& passwordString) {
             throw error::InvalidPassword();
         }
     }
-
-    // Create password object and return it.
-    return Password(passwordString);
 }
