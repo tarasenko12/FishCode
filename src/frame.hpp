@@ -30,6 +30,7 @@
 #include <thread>
 #include <wx/event.h>
 #include <wx/frame.h>
+#include <wx/msgdlg.h>
 #include <wx/string.h>
 #include <wx/timer.h>
 #include "button.hpp"
@@ -37,6 +38,7 @@
 #include "field.hpp"
 #include "label.hpp"
 #include "progress.hpp"
+#include "strings.hpp"
 
 namespace fc {
     class Frame : public wxFrame {
@@ -57,9 +59,24 @@ namespace fc {
         void OnDecrypt(wxCommandEvent& event);
         void OnDoneUpdate(events::UpdateDone& event);
         void OnEncrypt(wxCommandEvent& event);
-        void OnHelp(wxCommandEvent& event);
-        void OnProgressUpdate(events::UpdateProgress& event);
+
+        inline void OnHelp(wxCommandEvent& event) {
+            // Display a message box with short documentation.
+            wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
+        }
+
+        inline void OnProgressUpdate(events::UpdateProgress& event) {
+            // Set new value in the progress bar.
+            progressBar->SetValue(event.GetProgress());
+        }
+
         void OnReadyTimer(wxTimerEvent& event);
+
+        inline void OnTaskException(events::TaskException& event){
+            // Display GUI error message.
+            wxMessageBox(event.What(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+        }
+
         void OnSet(wxCommandEvent& event);
     private:
         std::unique_ptr<std::thread> taskThread;
