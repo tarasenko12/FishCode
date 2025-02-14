@@ -27,10 +27,19 @@
 #include "file.hpp"
 #include "key.hpp"
 
-fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
+fc::File::File() {
+    // Now its file stream is not valid (no real file).
+    stream.setstate(std::ios::badbit | std::ios::eofbit);
+
+    // Now it is empty file.
+    size = 0;
+}
+
+fc::File::File(const std::filesystem::path& newFSPath, const fc::FileType type)
+: fsPath(newFSPath) {
     if (type == FileType::FT_INPUT) {
         // Open a file.
-        stream.open(fsPath, std::ios::in | std::ios::binary | std::ios::ate);
+        stream.open(newFSPath, std::ios::in | std::ios::binary | std::ios::ate);
 
         // Calculate size of the file.
         size = static_cast<std::streamsize>(stream.tellg());
@@ -39,7 +48,7 @@ fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
         stream.seekg(std::ios::beg);
     } else {
         // Create a file.
-        stream.open(fsPath, std::ios::out | std::ios::binary);
+        stream.open(newFSPath, std::ios::out | std::ios::binary);
 
         // Now it is empty file.
         size = 0;
@@ -74,6 +83,9 @@ void fc::File::WriteBlock(const fc::Block& block) {
 
     // Write these bytes to the file.
     stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(block.GetRealSize()));
+
+    // Update file size.
+    size += static_cast<std::streamsize>(block.GetRealSize());
 }
 
 void fc::File::WriteKey(const fc::Key& key) {
@@ -82,4 +94,7 @@ void fc::File::WriteKey(const fc::Key& key) {
 
     // Write these bytes to the file.
     stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
+
+    // Update file size.
+    size += static_cast<std::streamsize>(Key::SIZE);
 }

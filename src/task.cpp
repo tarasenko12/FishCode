@@ -23,11 +23,13 @@
 */
 
 #include <atomic>
+#include <exception>
+#include <ios>
 #include <memory>
-#include <cstddef>
 #include <wx/event.h>
 #include "block.hpp"
 #include "events.hpp"
+#include "key.hpp"
 #include "task.hpp"
 
 fc::Task::ProgressData::ProgressData() {
@@ -41,20 +43,29 @@ fc::Task::ProgressData::ProgressData() {
 // Disable task abortion (default).
 std::atomic<bool> fc::taskShouldCancel(false);
 
-void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
+void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) try {
     // Calculate total number of full blocks in the file.
-    task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
+    task->progressData.total = (task->data.inputFile.GetSize() - Key::SIZE) / Block::SIZE;
 
-    // Read decryption (encrypted) key from the file.
+    // Read decryption (encrypted) key from the input file.
     task->data.key = task->data.inputFile.ReadKey();
 
-    // Decrypt the key using password.
+    // Decrypt the key.
     task->data.key.Decrypt(task->data.password);
 
     // Decrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    while (task->progressData.current < task->progressData.total) {
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Remove output file (user doesn't need it).
+            task->data.outputFile.Remove();
+
+            // Terminate the thread.
+            return;
+        }
+
         // Read one block from the file.
-        auto block = task->data.inputFile.ReadBlock();
+        auto block = task->data.inputFile.ReadBlock(static_cast<std::streamsize>(Block::SIZE));
 
         // Decrypt the block.
         block.Decrypt(task->data.key);
@@ -62,47 +73,50 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        } else {
-            // Notify the main thread about UI update.
+        // Update current progress.
+        task->progressData.current++;
+
+        // Send a message about progress update (if it isn't the last block).
+        if (task->progressData.current < task->progressData.total) {
             wxPostEvent(sink, events::UpdateProgress(
-                fc::events::ID_PROGRESS,
-                task->progressData.current / task->progressData.total * 100)
+                fc::events::ID_FRAME,
+                (task->progressData.current * 100) / task->progressData.total)
             );
         }
     }
 
-    // Check if file contains a partial block (realSize < SIZE).
-    if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
-        // Calculate block size.
-        const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
+    // Check if there is a partial block.
+    if ((task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE != 0 && !taskShouldCancel) {
+        // Calculate size of the partial block.
+        const auto blockSize = (task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE;
 
-        // Read block from the file.
-        auto block = task->data.inputFile.ReadBlock(blockSize);
+        // Read this block from the file.
+        auto block = task->data.inputFile.ReadBlock(static_cast<std::streamsize>(blockSize));
 
         // Decrypt the block.
         block.Decrypt(task->data.key);
 
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
-
-        // Set progress to 100%, if it is not already set.
-        if (task->progressData.current == 0) {
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
-        }
     }
 
-    // Notify the main thread about task completition (if it is not aborted).
+    // Check for task abortion.
     if (!taskShouldCancel) {
-        wxPostEvent(sink, events::UpdateDone(fc::events::ID_DONE));
+        // Notify the main thread about task completition.
+        wxPostEvent(sink, events::UpdateDone(fc::events::ID_FRAME));
+    } else {
+        // Remove output file (user doesn't need it).
+        task->data.outputFile.Remove();
     }
+} catch (const std::exception& ex) {
+    // Notify main thread about exception in the task thread.
+    wxPostEvent(sink, events::TaskException(events::ID_FRAME, ex));
+
+    // Terminate the thread.
+    return;
 }
 
-void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
+void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) try {
     // Calculate total number of full blocks in the file.
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
@@ -118,10 +132,19 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Decrypt the key.
     task->data.key.Decrypt(task->data.password);
 
-    // Encrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    // Decrypt the input file by blocks.
+    while (task->progressData.current < task->progressData.total) {
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Remove output file (user doesn't need it).
+            task->data.outputFile.Remove();
+
+            // Terminate the thread.
+            return;
+        }
+
         // Read one block from the file.
-        auto block = task->data.inputFile.ReadBlock();
+        auto block = task->data.inputFile.ReadBlock(static_cast<std::streamsize>(Block::SIZE));
 
         // Encrypt the block.
         block.Encrypt(task->data.key);
@@ -129,42 +152,45 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        } else {
-            // Notify the main thread about UI update.
+        // Update current progress.
+        task->progressData.current++;
+
+        // Send a message about progress update (if it isn't the last block).
+        if (task->progressData.current < task->progressData.total) {
             wxPostEvent(sink, events::UpdateProgress(
-                fc::events::ID_PROGRESS,
-                task->progressData.current / task->progressData.total * 100)
+                fc::events::ID_FRAME,
+                (task->progressData.current * 100) / task->progressData.total)
             );
         }
     }
 
-    // Check if file contains a partial block (realSize < SIZE).
+    // Check if there is a partial block.
     if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
-        // Calculate block size.
+        // Calculate size of the partial block.
         const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
 
-        // Read block from the file.
-        auto block = task->data.inputFile.ReadBlock(blockSize);
+        // Read this block from the file.
+        auto block = task->data.inputFile.ReadBlock(static_cast<std::streamsize>(blockSize));
 
         // Encrypt the block.
         block.Encrypt(task->data.key);
 
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
-
-        // Set progress to 100%, if it is not already set.
-        if (task->progressData.current == 0) {
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
-        }
     }
 
-    // Notify the main thread about task completition (if it is not aborted).
+    // Check for task abortion.
     if (!taskShouldCancel) {
-        wxPostEvent(sink, events::UpdateDone(fc::events::ID_DONE));
+        // Notify the main thread about task completition.
+        wxPostEvent(sink, events::UpdateDone(fc::events::ID_FRAME));
+    } else {
+        // Remove output file (user doesn't need it).
+        task->data.outputFile.Remove();
     }
+} catch (const std::exception& ex) {
+    // Notify main thread about exception in the task thread.
+    wxPostEvent(sink, events::TaskException(events::ID_FRAME, ex));
+
+    // Terminate the thread.
+    return;
 }

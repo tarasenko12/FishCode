@@ -166,11 +166,14 @@ fc::Frame::Frame()
     Bind(wxEVT_TIMER, &fc::Frame::OnReadyTimer, this, events::ID_READY);
 
     // Set up status update handlers.
-    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_DONE);
-    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_PROGRESS);
+    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_FRAME);
+    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_FRAME);
+
+    // Configure worker thread exception handler.
+    Bind(events::EVT_TASK_EXCEPTION, &fc::Frame::OnTaskException, this, events::ID_FRAME);
 
     // Configure frame closing handler.
-    Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::OnClose, this, events::ID_CLOSE);
+    Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::OnClose, this, events::ID_FRAME);
 }
 
 void fc::Frame::OnAbout(wxCommandEvent& event) {
@@ -281,9 +284,6 @@ void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
 
     // Create new thread for the decryption task.
     taskThread = std::make_unique<std::thread>(TaskDecrypt, this, std::move(task));
-
-    // Allow task to run independently.
-    taskThread->detach();
 } catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
@@ -296,10 +296,15 @@ void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
     // Disable "Cancel" button.
     DisableCancelButton();
 
-    // Set new value in the progress bar (100%) if it is not already set.
-    if (progressBar->GetValue() != 100) {
-        progressBar->SetValue(100);
+    // Join task thread to replace it in the future.
+    if (taskThread) {
+        if (taskThread->joinable()) {
+            taskThread->join();
+        }
     }
+
+    // Set new value in the progress bar (100%).
+    progressBar->SetValue(100);
 
     // Set new status in the status bar.
     SetStatusText(STR_STATUS1);
@@ -345,28 +350,12 @@ void fc::Frame::OnEncrypt(wxCommandEvent& event) try {
 
     // Create new thread for the encryption task.
     taskThread = std::make_unique<std::thread>(TaskEncrypt, this, std::move(task));
-
-    // Allow task to run independently.
-    taskThread->detach();
 } catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
     wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
-}
-
-void fc::Frame::OnHelp(wxCommandEvent& event) {
-    // Display a message box with short documentation.
-    wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
-}
-
-void fc::Frame::OnProgressUpdate(fc::events::UpdateProgress& event) {
-    // Set new value in the progress bar.
-    progressBar->SetValue(event.GetProgress());
-
-    // Notify user about progress update.
-    progressBar->Pulse();
 }
 
 void fc::Frame::OnReadyTimer(wxTimerEvent& event) {
