@@ -17,36 +17,41 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <array>
-#include <string>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
+#include "errors.hpp"
 #include "password.hpp"
+#include "types.hpp"
 
-fc::Password::Password(const std::string& passwordString) {
+fc::Password::Password(const std::string& password_string)
+: password_string(password_string)
+{
     // Get length of the string (in bytes).
-    const auto length = passwordString.length();
+    const auto length = password_string.length();
 
-    // Create storage for the new password bytes.
-    std::array<std::uint8_t, SIZE> newBytes;
-
-    // Convert each symbol into its binary representation and store it.
-    for (std::size_t index = 0; index < length; index++) {
-        newBytes[index] = static_cast<std::uint8_t>(passwordString[index]);
+    // Check password length.
+    if (length < MIN_LENGTH || length > MAX_LENGTH) {
+        // Invalid password.
+        throw errors::InvalidPassword();
     }
 
-    // Check if password string doesn't have maximal length.
-    if (length < SIZE) {
-        // Append additional bytes from the beginning.
-        for (std::size_t counter = length, index = 0; counter < SIZE; counter++, index++) {
-            newBytes[counter] = newBytes[index];
+    // Check password symbols.
+    for (const auto symbol : password_string) {
+        // Only printable ASCII symbols (no spaces).
+        if (symbol < '!' || symbol > '~') {
+            // Invalid password.
+            throw errors::InvalidPassword();
         }
     }
 
-    // Store new password bytes.
-    SetBytes(std::move(newBytes));
+    // Convert each symbol into its binary representation and store it.
+    for (Index index = 0; index < length; index++) {
+        bytes[index] = static_cast<Byte>(password_string[index]);
+    }
 
-    // Configure real size of the block.
-    SetRealSize(SIZE);
+    // Check if password string doesn't have maximal length.
+    if (length < MAX_LENGTH) {
+        // Append additional bytes from the beginning.
+        for (Index counter = length, index = 0; counter < MAX_LENGTH; counter++, index++) {
+            bytes[counter] = bytes[index];
+        }
+    }
 }

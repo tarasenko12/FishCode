@@ -67,7 +67,7 @@ namespace fc {
     constexpr const auto STR_STATUS2 = "Abort";
     constexpr const auto STR_STATUS3 = "Encrypting...";
     constexpr const auto STR_STATUS4 = "Decrypting...";
-    constexpr const auto STR_VERSION = "v1.0.0";
+    constexpr const auto STR_VERSION = "v2.0.0";
 }
 
 #endif // FISHCODE_STRINGS_HPP

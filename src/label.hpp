@@ -29,17 +29,19 @@
 #include <wx/string.h>
 #include <wx/window.h>
 
-namespace fc {
+namespace fc
+{
     class Label : public wxStaticText {
     public:
         Label(wxWindow* parent, const wxString& text);
-        Label(const Label& otherLabel) = delete;
-        Label(Label&& otherLabel) noexcept = delete;
 
-        Label& operator=(const Label& otherLabel) = delete;
-        Label& operator=(Label&& otherLabel) noexcept = delete;
+        Label(const Label& label) = delete;
+        Label(Label&& label) noexcept = delete;
 
-        ~Label() noexcept override = default;
+        Label& operator =(const Label& label) = delete;
+        Label& operator =(Label&& label) noexcept = delete;
+
+        virtual ~Label() noexcept override = default;
     };
 }
 

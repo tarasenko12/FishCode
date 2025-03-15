@@ -22,46 +22,51 @@
 
 #include <filesystem>
 #include <fstream>
-#include <ios>
 #include "block.hpp"
 #include "key.hpp"
+#include "types.hpp"
 
-namespace fc {
+namespace fc
+{
     enum class FileType {
-        FT_INPUT,
-        FT_OUTPUT
+        input,
+        output
     };
 
     class File {
     public:
         File();
-        File(const std::filesystem::path& newFSPath, const FileType type);
-        File(const File& anotherFile) = delete;
-        File(File&& anotherFile) noexcept = default;
 
-        ~File() noexcept = default;
+        File(const Path& path, FileType type, bool encrypted = false);
 
-        File& operator=(const File& anotherFile) = delete;
-        File& operator=(File&& anotherFile) noexcept = default;
+        File(const File& file) = delete;
+        File(File&& file) noexcept = default;
 
-        inline std::streamsize GetSize() const noexcept {
+        virtual ~File() noexcept = default;
+
+        File& operator =(const File& file) = delete;
+        File& operator =(File&& file) noexcept = default;
+
+        inline FileSize getSize() const noexcept
+        {
             return size;
         }
 
-        Block ReadBlock(const std::streamsize bytesToRead);
-        Key ReadKey();
+        Block readBlock(FileSize read_size = Block::MAX_SIZE) const;
+        Key readKey() const;
 
-        inline void Remove() {
-            // Remove this file using filesystem path.
-            std::filesystem::remove(fsPath);
+        inline void remove()
+        {
+            // Remove this file using standard filesystem manipulations.
+            std::filesystem::remove(path);
         }
 
-        void WriteBlock(const Block& block);
-        void WriteKey(const Key& key);
-    private:
-        std::filesystem::path fsPath;
-        std::streamsize size;
-        std::fstream stream;
+        void writeBlock(const Block& block);
+        void writeKey(const Key& key);
+    protected:
+        Path path;
+        FileSize size;
+        mutable std::fstream stream;
     };
 }
 

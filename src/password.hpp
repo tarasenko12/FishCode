@@ -21,24 +21,29 @@
 #define FISHCODE_PASSWORD_HPP
 
 #include <string>
-#include <cstddef>
 #include "key.hpp"
+#include "types.hpp"
 
-namespace fc {
+namespace fc
+{
     class Password : public Key {
     public:
-        static constexpr const std::size_t MIN_LENGTH = 8;
-        static constexpr const std::size_t MAX_LENGTH = SIZE;
+        static constexpr const Size MIN_LENGTH = 8;
+        static constexpr const Size MAX_LENGTH = SIZE;
 
         Password() = default;
-        Password(const std::string& passwordString);
-        Password(const Password& otherPassword) = default;
-        Password(Password&& otherPassword) noexcept = default;
 
-        ~Password() noexcept override = default;
+        Password(const std::string& password_string);
 
-        Password& operator=(const Password& otherPassword) = default;
-        Password& operator=(Password&& otherPassword) noexcept = default;
+        Password(const Password& password) = default;
+        Password(Password&& password) noexcept = default;
+
+        virtual ~Password() noexcept override = default;
+
+        Password& operator =(const Password& password) = default;
+        Password& operator =(Password&& password) noexcept = default;
+    protected:
+        std::string password_string;
     };
 }
 

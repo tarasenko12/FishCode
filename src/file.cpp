@@ -17,84 +17,133 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <array>
 #include <filesystem>
 #include <ios>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
 #include "block.hpp"
+#include "errors.hpp"
 #include "file.hpp"
 #include "key.hpp"
+#include "types.hpp"
 
-fc::File::File() {
-    // Now its file stream is not valid (no real file).
+fc::File::File()
+: size(0)
+{
+    // Make file stream unusable.
     stream.setstate(std::ios::badbit | std::ios::eofbit);
-
-    // Now it is empty file.
-    size = 0;
 }
 
-fc::File::File(const std::filesystem::path& newFSPath, const fc::FileType type)
-: fsPath(newFSPath) {
-    if (type == FileType::FT_INPUT) {
+fc::File::File(const fc::Path& path, fc::FileType type, bool encrypted)
+: path(path)
+{
+    if (type == FileType::input) {
+        // Check if path is not empty.
+        if (path.empty()) {
+            // Invalid output file (no file).
+            throw errors::InvalidInputFile();
+        }
+
+        // Check if it is path to a regular file.
+        if (!std::filesystem::is_regular_file(path)) {
+            // Invalid input file.
+            throw errors::InvalidInputFile();
+        }
+
         // Open a file.
-        stream.open(newFSPath, std::ios::in | std::ios::binary | std::ios::ate);
+        stream.open(path, std::ios::in | std::ios::binary | std::ios::ate);
 
         // Calculate size of the file.
-        size = static_cast<std::streamsize>(stream.tellg());
+        size = static_cast<FileSize>(stream.tellg());
+
+        // Check file size.
+        if (encrypted) {
+            if (size < static_cast<FileSize>(Key::SIZE) + 1) {
+                // Invalid input file.
+                throw errors::InvalidInputFile();
+            }
+        }
+        else {
+            if (size < static_cast<FileSize>(Block::MIN_SIZE)) {
+                // Invalid input file.
+                throw errors::InvalidInputFile();
+            }
+        }
 
         // Rewind the stream.
         stream.seekg(std::ios::beg);
-    } else {
-        // Create a file.
-        stream.open(newFSPath, std::ios::out | std::ios::binary);
+    }
+    else {
+        // Check if path is not empty.
+        if (path.empty()) {
+            // Invalid output file (no file).
+            throw errors::InvalidOutputFile();
+        }
 
-        // Now it is empty file.
+        // Check if path points to the existing file.
+        if (std::filesystem::exists(path)) {
+            // Check if it is regular file.
+            if (!std::filesystem::is_regular_file(path)) {
+                // Invalid output file.
+                throw errors::InvalidOutputFile();
+            }
+        }
+
+        // Create a file.
+        stream.open(path, std::ios::out | std::ios::binary);
+
+        // It is empty file.
         size = 0;
     }
 }
 
-fc::Block fc::File::ReadBlock(const std::streamsize bytesToRead) {
-    // Create storage for the block (raw bytes).
-    std::array<std::uint8_t, Block::SIZE> bytes;
+fc::Block fc::File::readBlock(FileSize read_size) const
+{
+    // Create storage for the block.
+    Block block;
 
-    // Read block (raw bytes) from the file.
-    stream.read(reinterpret_cast<char*>(bytes.data()), bytesToRead);
+    // Read block by bytes from the file.
+    for (FileIndex index = 0; index < read_size; index++) {
+        // Read one byte from the file and store it to the block.
+        block.push(static_cast<Byte>(stream.get()));
+    }
 
-    // Create a real block object and return it.
-    return Block(std::move(bytes), static_cast<std::size_t>(bytesToRead));
+    // Return the block.
+    return block;
 }
 
-fc::Key fc::File::ReadKey() {
-    // Create storage for the key (raw bytes).
-    std::array<std::uint8_t, Key::SIZE> bytes;
+fc::Key fc::File::readKey() const
+{
+    // Create storage for the key.
+    Key key;
 
-    // Read key (raw bytes) from the file.
-    stream.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
+    // Read key by bytes from the file.
+    for (auto& byte : key) {
+        // Read one byte and store it.
+        byte = static_cast<Byte>(stream.get());
+    }
 
     // Create a real key object and return it.
-    return Key(std::move(bytes));
+    return key;
 }
 
-void fc::File::WriteBlock(const fc::Block& block) {
-    // Get a copy of the block bytes.
-    const auto bytes = block.GetBytes();
+void fc::File::writeBlock(const fc::Block& block)
+{
+    // Write block by bytes.
+    for (auto byte : block) {
+        // Store the byte.
+        stream.put(byte);
 
-    // Write these bytes to the file.
-    stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(block.GetRealSize()));
-
-    // Update file size.
-    size += static_cast<std::streamsize>(block.GetRealSize());
+        // Increase file size.
+        size++;
+    }
 }
 
-void fc::File::WriteKey(const fc::Key& key) {
-    // Get a copy of the key bytes.
-    const auto bytes = key.GetBytes();
+void fc::File::writeKey(const fc::Key& key) {
+    // Write key by bytes.
+    for (auto byte : key) {
+        // Store the byte.
+        stream.put(byte);
 
-    // Write these bytes to the file.
-    stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
-
-    // Update file size.
-    size += static_cast<std::streamsize>(Key::SIZE);
+        // Increase file size.
+        size++;
+    }
 }

@@ -28,6 +28,7 @@
 #include "label.hpp"
 
 fc::Label::Label(wxWindow* parent, const wxString& text)
-: wxStaticText(parent, wxID_ANY, text) {
+: wxStaticText(parent, wxID_ANY, text)
+{
 
 }
