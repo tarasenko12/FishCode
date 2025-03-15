@@ -40,79 +40,91 @@
 #include "progress.hpp"
 #include "strings.hpp"
 
-namespace fc {
+namespace fc
+{
     class Frame : public wxFrame {
     public:
         Frame();
-        Frame(const Frame& otherFrame) = delete;
-        Frame(Frame&& otherFrame) noexcept = delete;
 
-        Frame& operator=(const Frame& otherFrame) = delete;
-        Frame& operator=(Frame&& otherFrame) noexcept = delete;
+        Frame(const Frame& frame) = delete;
+        Frame(Frame&& frame) noexcept = delete;
 
-        ~Frame() noexcept override = default;
+        Frame& operator =(const Frame& frame) = delete;
+        Frame& operator =(Frame&& frame) noexcept = delete;
 
-        void OnAbout(wxCommandEvent& event);
-        void OnCancel(wxCommandEvent& event);
-        void OnChoose(wxCommandEvent& event);
-        void OnClose(wxCloseEvent& event);
-        void OnDecrypt(wxCommandEvent& event);
-        void OnDoneUpdate(events::UpdateDone& event);
-        void OnEncrypt(wxCommandEvent& event);
-        void OnHelp(wxCommandEvent& event);
-        void OnProgressUpdate(events::UpdateProgress& event);
-        void OnReadyTimer(wxTimerEvent& event);
-        void OnTaskException(events::TaskException& event);
-        void OnSet(wxCommandEvent& event);
-    private:
-        std::unique_ptr<std::thread> taskThread;
-        std::array<Button*, 5> buttons;
-        std::array<Field*, 3> fields;
-        std::array<Label*, 3> labels;
-        std::unique_ptr<wxTimer> readyTimer;
-        ProgressBar* progressBar;
+        virtual ~Frame() noexcept override = default;
 
-        inline wxString GetIFPathValue() const noexcept {
+        void onAbout(wxCommandEvent& event);
+        void onCancel(wxCommandEvent& event);
+        void onChoose(wxCommandEvent& event);
+        void onClose(wxCloseEvent& event);
+        void onDecrypt(wxCommandEvent& event);
+        void onEncrypt(wxCommandEvent& event);
+        void onHelp(wxCommandEvent& event);
+        void onReadyTimer(wxTimerEvent& event);
+        void onSet(wxCommandEvent& event);
+
+        void onDoneUpdate(events::UpdateDone& event);
+        void onTaskException(events::TaskException& event);
+        void onProgressUpdate(events::UpdateProgress& event);
+    protected:
+        inline wxString getIFPathValue() const
+        {
             return fields[0]->GetValue();
         }
 
-        inline wxString GetOFPathValue() const noexcept {
+        inline wxString getOFPathValue() const
+        {
             return fields[1]->GetValue();
         }
 
-        inline wxString GetPasswordValue() const noexcept {
+        inline wxString getPasswordValue() const
+        {
             return fields[2]->GetValue();
         }
 
-        inline void SetIFPathValue(const wxString& newValue) noexcept {
-            fields[0]->ChangeValue(newValue);
+        inline void setIFPathValue(const wxString& value)
+        {
+            fields[0]->ChangeValue(value);
         }
 
-        inline void SetOFPathValue(const wxString& newValue) noexcept {
-            fields[1]->ChangeValue(newValue);
+        inline void setOFPathValue(const wxString& value)
+        {
+            fields[1]->ChangeValue(value);
         }
 
-        inline void DisableCancelButton() noexcept {
+        inline void disableCancelButton()
+        {
             buttons[4]->Disable();
         }
 
-        void DisableButtons() noexcept;
-        void DisableFields() noexcept;
+        void disableButtons();
+        void disableFields();
 
-        inline void DisableProgressBar() noexcept {
-            progressBar->Disable();
+        inline void disableProgressBar()
+        {
+            progress_bar->Disable();
         }
 
-        inline void EnableCancelButton() noexcept {
+        inline void enableCancelButton()
+        {
             buttons[4]->Enable();
         }
 
-        void EnableButtons() noexcept;
-        void EnableFields() noexcept;
+        void enableButtons();
+        void enableFields();
 
-        inline void EnableProgressBar() noexcept {
-            progressBar->Enable();
+        inline void enableProgressBar()
+        {
+            progress_bar->Enable();
         }
+    private:
+        std::unique_ptr<std::thread> task_thread;
+        std::array<Button*, 5> buttons;
+        std::array<Field*, 3> fields;
+        std::array<Label*, 3> labels;
+        std::unique_ptr<wxTimer> ready_timer;
+        ProgressBar* progress_bar;
     };
 }
 

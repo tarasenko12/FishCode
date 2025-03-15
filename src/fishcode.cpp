@@ -41,7 +41,8 @@ bool fc::FishCode::OnInit() try {
 
     // Start the application.
     return true;
-} catch (const std::exception& ex) {
+}
+catch (const std::exception& ex) {
     // Print error message to the terminal.
     std::cerr << ex.what() << std::endl;
 

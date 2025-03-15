@@ -20,49 +20,67 @@
 #ifndef FISHCODE_BLOCK_HPP
 #define FISHCODE_BLOCK_HPP
 
-#include <array>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
+#include <vector>
+#include "key.hpp"
+#include "types.hpp"
 
-namespace fc {
-    class Key;
-
+namespace fc
+{
     class Block {
     public:
-        static constexpr const std::size_t SIZE = 16;
+        static constexpr const Size MIN_SIZE = 1;
+        static constexpr const Size MAX_SIZE = 16;
+
+        using Vector = std::vector<Byte>;
+        using Iterator = Vector::iterator;
+        using ConstIterator = Vector::const_iterator;
 
         Block();
-        Block(std::array<std::uint8_t, SIZE>&& newBytes, const std::size_t newRealSize) noexcept;
-        Block(const Block& otherBlock) = default;
-        Block(Block&& otherBlock) noexcept = default;
+
+        Block(const Vector& bytes);
+
+        Block(const Block& block) = default;
+        Block(Block&& block) noexcept = default;
 
         virtual ~Block() noexcept = default;
 
-        Block& operator=(const Block& otherBlock) = default;
-        Block& operator=(Block&& otherBlock) noexcept = default;
+        Block& operator =(const Block& block) = default;
+        Block& operator =(Block&& block) noexcept = default;
 
-        inline std::array<std::uint8_t, SIZE> GetBytes() const {
-            return bytes;
+        inline Iterator begin()
+        {
+            return bytes.begin();
         }
 
-        inline std::size_t GetRealSize() const noexcept {
-            return realSize;
+        inline Iterator end()
+        {
+            return bytes.end();
         }
 
-        void Decrypt(const Key& key);
-        void Encrypt(const Key& key);
+        inline ConstIterator begin() const
+        {
+            return bytes.begin();
+        }
+
+        inline ConstIterator end() const
+        {
+            return bytes.end();
+        }
+
+        inline void push(Byte byte)
+        {
+            bytes.push_back(byte);
+        }
+
+        inline void pop()
+        {
+            bytes.pop_back();
+        }
+
+        void encrypt(const Key& key);
+        void decrypt(const Key& key);
     protected:
-        inline void SetBytes(std::array<uint8_t, SIZE>&& newBytes) noexcept {
-            bytes = std::move(newBytes);
-        }
-
-        inline void SetRealSize(const std::size_t newRealSize) noexcept {
-            realSize = newRealSize;
-        }
-    private:
-        std::array<std::uint8_t, SIZE> bytes;
-        std::size_t realSize;
+        Vector bytes;
     };
 }
 

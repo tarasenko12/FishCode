@@ -15,21 +15,25 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
-**
-** This program uses wxWidgets, a free and open-source cross-platform C++
-** library for creating GUIs. wxWidgets is licensed under the wxWindows
-** Library License, which is compatible with the GNU GPL.
-** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <wx/button.h>
-#include <wx/string.h>
-#include <wx/window.h>
-#include <wx/windowid.h>
-#include "button.hpp"
+#ifndef FISHCODE_TYPES_HPP
+#define FISHCODE_TYPES_HPP
 
-fc::Button::Button(wxWindow* parent, wxWindowID id, const wxString& label)
-: wxButton(parent, id, label)
+#include <filesystem>
+#include <ios>
+#include <cstdint>
+#include <cstddef>
+
+namespace fc
 {
-
+    using Byte = std::uint8_t;
+    using Size = std::size_t;
+    using FileSize = std::streamsize;
+    using Index = Size;
+    using FileIndex = FileSize;
+    using Round = int;
+    using Path = std::filesystem::path;
 }
+
+#endif // FISHCODE_TYPES_HPP

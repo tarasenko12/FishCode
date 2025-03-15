@@ -28,23 +28,26 @@
 
 wxDEFINE_EVENT(fc::events::EVT_TASK_EXCEPTION, fc::events::TaskException);
 
-fc::events::TaskException::TaskException(const int newID, const std::exception& ex) noexcept
-: wxEvent(newID, fc::events::EVT_TASK_EXCEPTION) {
-    // Copy exception explanation string.
-    exWhat = ex.what();
+fc::events::TaskException::TaskException(int id, const std::exception& ex) noexcept
+: wxEvent(id, fc::events::EVT_TASK_EXCEPTION),
+  prompt(ex.what())
+{
+
 }
 
 wxDEFINE_EVENT(fc::events::EVT_UPDATE_DONE, fc::events::UpdateDone);
 
-fc::events::UpdateDone::UpdateDone(const int newID)
-: wxEvent(newID, fc::events::EVT_UPDATE_DONE) {
+fc::events::UpdateDone::UpdateDone(int id)
+: wxEvent(id, fc::events::EVT_UPDATE_DONE)
+{
 
 }
 
 wxDEFINE_EVENT(fc::events::EVT_UPDATE_PROGRESS, fc::events::UpdateProgress);
 
-fc::events::UpdateProgress::UpdateProgress(const int newID, const int newProgress)
-: wxEvent(newID, fc::events::EVT_UPDATE_PROGRESS) {
-    // Set new progress value.
-    progress = newProgress;
+fc::events::UpdateProgress::UpdateProgress(int id, int progress)
+: wxEvent(id, fc::events::EVT_UPDATE_PROGRESS),
+  progress(progress)
+{
+
 }

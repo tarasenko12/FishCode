@@ -20,7 +20,8 @@
 #ifndef FISHCODE_STRINGS_HPP
 #define FISHCODE_STRINGS_HPP
 
-namespace fc {
+namespace fc
+{
     constexpr const auto STR_CAPTION0 = "User documentation";
     constexpr const auto STR_CAPTION1 = "Choose an input file";
     constexpr const auto STR_CAPTION2 = "Set an output file";

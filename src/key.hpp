@@ -21,26 +21,69 @@
 #define FISHCODE_KEY_HPP
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
-#include "block.hpp"
+#include "types.hpp"
 
-namespace fc {
-    class Key : public Block {
+namespace fc
+{
+    class Key {
     public:
+        static constexpr const Size SIZE = 16;
+        static constexpr const Byte BYTE_MAX = 0xff;
+
+        using Array = std::array<Byte, SIZE>;
+        using Iterator = Array::iterator;
+        using ConstIterator = Array::const_iterator;
+
         Key() = default;
-        Key(std::array<std::uint8_t, SIZE>&& newBytes) noexcept;
-        Key(const Key& otherKey) = default;
-        Key(Key&& otherKey) noexcept = default;
 
-        virtual ~Key() noexcept override = default;
+        Key(const Array& bytes);
 
-        Key& operator=(const Key& otherKey) = default;
-        Key& operator=(Key&& otherKey) noexcept = default;
+        Key(const Key& key) = default;
+        Key(Key&& key) noexcept = default;
 
-        static Key Generate();
+        virtual ~Key() noexcept = default;
 
-        Key GetRoundKey(const int round) const;
+        Key& operator =(const Key& key) = default;
+        Key& operator =(Key&& key) noexcept = default;
+
+        inline Byte& operator [](Index index) noexcept
+        {
+            return bytes[index];
+        }
+
+        inline const Byte& operator [](Index index) const noexcept
+        {
+            return bytes[index];
+        }
+
+        inline Iterator begin()
+        {
+            return bytes.begin();
+        }
+
+        inline Iterator end()
+        {
+            return bytes.end();
+        }
+
+        inline ConstIterator begin() const
+        {
+            return bytes.begin();
+        }
+
+        inline ConstIterator end() const
+        {
+            return bytes.end();
+        }
+
+        static Key generate();
+
+        Key getRoundKey(Round round) const;
+
+        void encrypt(const Key& key);
+        void decrypt(const Key& key);
+    protected:
+        Array bytes;
     };
 }
 
