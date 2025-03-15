@@ -29,8 +29,8 @@ add_executable(fishcode
     "src/block.hpp"
     "src/button.cpp"
     "src/button.hpp"
-    "src/error.cpp"
-    "src/error.hpp"
+    "src/errors.cpp"
+    "src/errors.hpp"
     "src/events.cpp"
     "src/events.hpp"
     "src/field.cpp"
@@ -52,6 +52,7 @@ add_executable(fishcode
     "src/strings.hpp"
     "src/task.cpp"
     "src/task.hpp"
+    "src/types.hpp"
 )
 
 # Link external libraries.
