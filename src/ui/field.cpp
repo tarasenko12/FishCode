@@ -22,13 +22,33 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <wx/stattext.h>
-#include <wx/string.h>
-#include <wx/window.h>
-#include "label.hpp"
+module;
 
-fc::Label::Label(wxWindow* parent, const wxString& text)
-: wxStaticText(parent, wxID_ANY, text)
+#include <wx/wx.h>
+
+module ui;
+
+fc::Field::Field(wxWindow* parent)
+: wxTextCtrl(parent, wxID_ANY)
 {
 
+}
+
+fc::Field::Field(
+    wxWindow* parent,
+    wxWindowID id,
+    const wxString& value,
+    const wxPoint& position,
+    const wxSize& size,
+    long style
+) : wxTextCtrl(parent, id, value, position, size, style)
+{
+
+}
+
+fc::PasswordField::PasswordField(wxWindow* parent)
+: Field(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD)
+{
+    // Set up size limit for the input string.
+    SetMaxLength(Password::MAX_LENGTH);
 }

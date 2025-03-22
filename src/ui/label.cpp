@@ -15,26 +15,21 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include "errors.hpp"
+module;
 
-const char* fc::errors::InvalidFileIO::what() const noexcept
-{
-    return "Invalid I/O configuration!";
-}
+#include <wx/wx.h>
 
-const char* fc::errors::InvalidInputFile::what() const noexcept
-{
-    return "Invalid input file!";
-}
+module ui;
 
-const char* fc::errors::InvalidOutputFile::what() const noexcept
+fc::Label::Label(wxWindow* parent, const wxString& text)
+: wxStaticText(parent, wxID_ANY, text)
 {
-    return "Invalid output file!";
-}
 
-const char* fc::errors::InvalidPassword::what() const noexcept
-{
-    return "Invalid password!";
 }

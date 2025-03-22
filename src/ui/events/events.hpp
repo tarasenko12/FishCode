@@ -41,10 +41,11 @@ namespace fc
             ID_SET
         };
 
-        constexpr const auto ID_READY = ID_SET + 1;
-        constexpr const auto ID_FRAME = ID_READY + 1;
+        constexpr auto ID_READY = ID_SET + 1;
+        constexpr auto ID_FRAME = ID_READY + 1;
 
         class TaskException : public wxEvent {
+            std::string prompt;
         public:
             TaskException(int id, const std::exception& ex) noexcept;
 
@@ -66,8 +67,6 @@ namespace fc
                 // Return C-style explanation string.
                 return prompt.c_str();
             }
-        protected:
-            std::string prompt;
         };
 
         wxDECLARE_EVENT(EVT_TASK_EXCEPTION, TaskException);
@@ -93,6 +92,7 @@ namespace fc
         wxDECLARE_EVENT(EVT_UPDATE_DONE, UpdateDone);
 
         class UpdateProgress : public wxEvent {
+            int progress;
         public:
             UpdateProgress(int id, int progress);
 
@@ -113,8 +113,6 @@ namespace fc
             {
                 return progress;
             }
-        protected:
-            int progress;
         };
 
         wxDECLARE_EVENT(EVT_UPDATE_PROGRESS, UpdateProgress);

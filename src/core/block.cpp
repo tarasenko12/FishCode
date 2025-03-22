@@ -17,9 +17,12 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "block.hpp"
-#include "key.hpp"
-#include "types.hpp"
+module;
+
+#include <vector>
+#include <cstddef>
+
+module core;
 
 fc::Block::Block()
 {
@@ -27,18 +30,12 @@ fc::Block::Block()
     bytes.reserve(MAX_SIZE);
 }
 
-fc::Block::Block(const fc::Block::Vector& bytes)
-: bytes(bytes)
-{
-
-}
-
 void fc::Block::encrypt(const fc::Key& key)
 {
     // Encrypt block within 15 rounds.
     for (int round = 0; round < 15; round++) {
         // Step 1: swap bytes.
-        for (Index index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
+        for (unsigned index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
             // Copy 'index - 1 byte' to the temporary storage.
             const auto temp = bytes[index - 1];
 
@@ -50,11 +47,11 @@ void fc::Block::encrypt(const fc::Key& key)
         }
 
         // Step 2: get round key.
-        const auto round_key = key.getRoundKey(round);
+        const auto roundKey = key.getRoundKey(round);
 
         // Step 3: xor key.
-        for (Index index = 0; index < bytes.size(); index++) {
-            bytes[index] ^= round_key[index];
+        for (unsigned index = 0; index < bytes.size(); index++) {
+            bytes[index] ^= roundKey[index];
         }
     }
 }
@@ -64,15 +61,15 @@ void fc::Block::decrypt(const fc::Key& key)
     // Decrypt block within 15 rounds.
     for (int round = 14; round >= 0; round--) {
         // Step 1: get round key.
-        const auto round_key = key.getRoundKey(round);
+        const auto roundKey = key.getRoundKey(round);
 
         // Step 2: xor key.
-        for (Index index = 0; index < bytes.size(); index++) {
-            bytes[index] ^= round_key[index];
+        for (unsigned index = 0; index < bytes.size(); index++) {
+            bytes[index] ^= roundKey[index];
         }
 
         // Step 3: swap bytes.
-        for (Index index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
+        for (unsigned index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
             // Copy 'index - 1 byte' to the temporary storage.
             const auto temp = bytes[index - 1];
 

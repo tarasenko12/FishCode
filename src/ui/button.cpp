@@ -22,27 +22,14 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_LABEL_HPP
-#define FISHCODE_LABEL_HPP
+module;
 
-#include <wx/stattext.h>
-#include <wx/string.h>
-#include <wx/window.h>
+#include <wx/wx.h>
 
-namespace fc
+module ui;
+
+fc::Button::Button(wxWindow* parent, wxWindowID id, const wxString& label)
+: wxButton(parent, id, label)
 {
-    class Label : public wxStaticText {
-    public:
-        Label(wxWindow* parent, const wxString& text);
 
-        Label(const Label& label) = delete;
-        Label(Label&& label) noexcept = delete;
-
-        Label& operator =(const Label& label) = delete;
-        Label& operator =(Label&& label) noexcept = delete;
-
-        virtual ~Label() noexcept override = default;
-    };
 }
-
-#endif // FISHCODE_LABEL_HPP

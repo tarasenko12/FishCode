@@ -17,15 +17,17 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "errors.hpp"
-#include "password.hpp"
-#include "types.hpp"
+module;
 
-fc::Password::Password(const std::string& password_string)
-: password_string(password_string)
+#include <string>
+
+module core;
+
+fc::Password::Password(const fc::Password::String& string)
+: string(string)
 {
     // Get length of the string (in bytes).
-    const auto length = password_string.length();
+    const auto length = string.length();
 
     // Check password length.
     if (length < MIN_LENGTH || length > MAX_LENGTH) {
@@ -34,7 +36,7 @@ fc::Password::Password(const std::string& password_string)
     }
 
     // Check password symbols.
-    for (const auto symbol : password_string) {
+    for (auto symbol : string) {
         // Only printable ASCII symbols (no spaces).
         if (symbol < '!' || symbol > '~') {
             // Invalid password.
@@ -43,15 +45,15 @@ fc::Password::Password(const std::string& password_string)
     }
 
     // Convert each symbol into its binary representation and store it.
-    for (Index index = 0; index < length; index++) {
-        bytes[index] = static_cast<Byte>(password_string[index]);
+    for (unsigned index = 0; index < length; index++) {
+        (*this)[index] = static_cast<Byte>(string[index]);
     }
 
     // Check if password string doesn't have maximal length.
     if (length < MAX_LENGTH) {
         // Append additional bytes from the beginning.
-        for (Index counter = length, index = 0; counter < MAX_LENGTH; counter++, index++) {
-            bytes[counter] = bytes[index];
+        for (unsigned counter = length, index = 0; counter < MAX_LENGTH; counter++, index++) {
+            (*this)[counter] = (*this)[index];
         }
     }
 }

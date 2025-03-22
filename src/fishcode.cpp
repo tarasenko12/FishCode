@@ -24,10 +24,30 @@
 
 #include <exception>
 #include <iostream>
+#include <wx/app.h>
 #include <wx/msgdlg.h>
-#include "fishcode.hpp"
-#include "frame.hpp"
-#include "strings.hpp"
+
+import core;
+import data;
+import ui;
+
+namespace fc
+{
+    class FishCode : public wxApp {
+    public:
+        FishCode() = default;
+
+        FishCode(const FishCode& app) = delete;
+        FishCode(FishCode&& app) noexcept = delete;
+
+        FishCode& operator =(const FishCode& app) = delete;
+        FishCode& operator =(FishCode&& app) noexcept = delete;
+
+        virtual ~FishCode() noexcept override = default;
+
+        bool OnInit() override;
+    };
+}
 
 // This defines the equivalent of main() for the current platform.
 wxIMPLEMENT_APP(fc::FishCode);

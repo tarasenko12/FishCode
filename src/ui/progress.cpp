@@ -22,26 +22,14 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_PROGRESS_HPP
-#define FISHCODE_PROGRESS_HPP
+module;
 
-#include <wx/gauge.h>
-#include <wx/window.h>
+#include <wx/wx.h>
 
-namespace fc
+module ui;
+
+fc::ProgressBar::ProgressBar(wxWindow* parent)
+: wxGauge(parent, wxID_ANY, 100)
 {
-    class ProgressBar : public wxGauge {
-    public:
-        ProgressBar(wxWindow* parent);
 
-        ProgressBar(const ProgressBar& bar) = delete;
-        ProgressBar(ProgressBar&& bar) noexcept = delete;
-
-        ProgressBar& operator =(const ProgressBar& bar) = delete;
-        ProgressBar& operator =(ProgressBar&& bar) noexcept = delete;
-
-        virtual ~ProgressBar() noexcept override = default;
-    };
 }
-
-#endif // FISHCODE_PROGRESS_HPP
