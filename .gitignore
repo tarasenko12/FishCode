@@ -1,7 +1,5 @@
-# Files and directories which Git should ignore.
-.vs
-.vscode
+# Standard build output directory.
 build
-out
-tests
 
+# Temporary directory for internal purposes.
+tmp
