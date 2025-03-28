@@ -28,57 +28,63 @@
 #include <atomic>
 #include <filesystem>
 #include <memory>
+#include <utility>
 #include <wx/event.h>
 #include "file.hpp"
 #include "password.hpp"
 
-namespace fc {
-    class TaskData {
-    public:
-        TaskData() = default;
-        TaskData(const TaskData& otherTaskData) = delete;
-        TaskData(TaskData&& otherTaskData) noexcept = default;
-
-        ~TaskData() noexcept = default;
-
-        TaskData& operator=(const TaskData& otherTaskData) = delete;
-        TaskData& operator=(TaskData&& otherTaskData) noexcept = default;
-
-        inline File& GetInputFile() noexcept {
-            return inputFile;
-        }
-
-        inline File& GetOutputFile() noexcept {
-            return outputFile;
-        }
-
-        inline const Password& GetPassword() const noexcept {
-            return password;
-        }
-
-        inline void SetInputFile(const std::filesystem::path& ifPath) {
-            // Open the file.
-            inputFile = File(ifPath, FileType::FT_INPUT);
-        }
-
-        inline void SetOutputFile(const std::filesystem::path& ofPath) {
-            // Create a file.
-            outputFile = File(ofPath, FileType::FT_OUTPUT);
-        }
-
-        inline void SetPassword(const std::string& passwordString) {
-            // Convert and copy password.
-            password = Password(passwordString);
-        }
+namespace fc
+{
+    class Task {
     private:
         File inputFile, outputFile;
         Password password;
+    public:
+        Task() = default;
+
+        Task(const Task& task) = delete;
+        Task(Task&& task) noexcept = default;
+
+        virtual ~Task() noexcept = default;
+
+        Task& operator =(const Task& task) = delete;
+        Task& operator =(Task&& task) noexcept = default;
+
+        File& getInputFile() noexcept
+        {
+            return inputFile;
+        }
+
+        File& getOutputFile() noexcept
+        {
+            return outputFile;
+        }
+
+        Password& getPassword() noexcept
+        {
+            return password;
+        }
+
+        void setInputFile(File&& file)
+        {
+            inputFile = std::move(file);
+        }
+
+        void setOutputFile(File&& file)
+        {
+            outputFile = std::move(file);
+        }
+
+        void setPassword(const Password& password)
+        {
+            this->password = password;
+        }
     };
 
-    extern std::atomic<bool> taskShouldCancel;
+    extern std::atomic<bool> abortTask;
 
-    void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<TaskData> data);
-    void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<TaskData> data);
+    void encrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
+    void decrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
 }
 
 #endif // FISHCODE_TASK_HPP

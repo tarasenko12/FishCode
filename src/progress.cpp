@@ -27,6 +27,7 @@
 #include "progress.hpp"
 
 fc::ProgressBar::ProgressBar(wxWindow* parent)
-: wxGauge(parent, wxID_ANY, 100) {
+: wxGauge(parent, wxID_ANY, 100)
+{
 
 }

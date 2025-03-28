@@ -27,17 +27,19 @@
 
 #include <wx/app.h>
 
-namespace fc {
+namespace fc
+{
     class FishCode : public wxApp {
     public:
         FishCode() = default;
-        FishCode(const FishCode& otherFishCode) = delete;
-        FishCode(FishCode&& otherFishCode) = delete;
 
-        FishCode& operator=(const FishCode& otherFishCode) = delete;
-        FishCode& operator=(FishCode&& otherFishCode) = delete;
+        FishCode(const FishCode& app) = delete;
+        FishCode(FishCode&& app) = delete;
 
-        ~FishCode() noexcept override = default;
+        FishCode& operator =(const FishCode& app) = delete;
+        FishCode& operator =(FishCode&& app) = delete;
+
+        virtual ~FishCode() noexcept override = default;
 
         bool OnInit() override;
     };

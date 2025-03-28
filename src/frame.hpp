@@ -32,87 +32,91 @@
 #include <wx/frame.h>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
-#include <wx/timer.h>
 #include "button.hpp"
 #include "events.hpp"
 #include "field.hpp"
+#include "file.hpp"
 #include "label.hpp"
+#include "password.hpp"
 #include "progress.hpp"
 #include "strings.hpp"
+#include "task.hpp"
 
-namespace fc {
+namespace fc
+{
     class Frame : public wxFrame {
-    public:
-        Frame();
-        Frame(const Frame& otherFrame) = delete;
-        Frame(Frame&& otherFrame) noexcept = delete;
-
-        Frame& operator=(const Frame& otherFrame) = delete;
-        Frame& operator=(Frame&& otherFrame) noexcept = delete;
-
-        ~Frame() noexcept override = default;
-
-        void OnAbout(wxCommandEvent& event);
-        void OnCancel(wxCommandEvent& event);
-        void OnChoose(wxCommandEvent& event);
-        void OnClose(wxCloseEvent& event);
-        void OnDecrypt(wxCommandEvent& event);
-        void OnDoneUpdate(events::UpdateDone& event);
-        void OnEncrypt(wxCommandEvent& event);
-        void OnHelp(wxCommandEvent& event);
-        void OnProgressUpdate(events::UpdateProgress& event);
-        void OnReadyTimer(wxTimerEvent& event);
-        void OnTaskException(events::TaskException& event);
-        void OnSet(wxCommandEvent& event);
     private:
         std::unique_ptr<std::thread> taskThread;
+        std::unique_ptr<std::thread> timerThread;
         std::array<Button*, 5> buttons;
         std::array<Field*, 3> fields;
         std::array<Label*, 3> labels;
-        std::unique_ptr<wxTimer> readyTimer;
         ProgressBar* progressBar;
+    public:
+        Frame();
 
-        inline wxString GetIFPathValue() const noexcept {
-            return fields[0]->GetValue();
+        Frame(const Frame& frame) = delete;
+        Frame(Frame&& frame) noexcept = delete;
+
+        Frame& operator =(const Frame& frame) = delete;
+        Frame& operator =(Frame&& frame) noexcept = delete;
+
+        virtual ~Frame() noexcept override = default;
+
+        void onAbout(wxCommandEvent& event);
+        void onCancel(wxCommandEvent& event);
+        void onChoose(wxCommandEvent& event);
+        void onClose(wxCloseEvent& event);
+        void onDecrypt(wxCommandEvent& event);
+        void onDone(events::DoneEvent& event);
+        void onEncrypt(wxCommandEvent& event);
+        void onHelp(wxCommandEvent& event);
+        void onProgressUpdate(events::UpdateProgress& event);
+        void onReady(events::ReadyEvent& event);
+        void onTaskException(events::TaskException& event);
+        void onSet(wxCommandEvent& event);
+    protected:
+        File::Path getIFPath() const
+        {
+            return File::Path(fields[0]->GetValue().utf8_string());
         }
 
-        inline wxString GetOFPathValue() const noexcept {
-            return fields[1]->GetValue();
+        File::Path getOFPath() const
+        {
+            return File::Path(fields[1]->GetValue().utf8_string());
         }
 
-        inline wxString GetPasswordValue() const noexcept {
-            return fields[2]->GetValue();
+        Password::String getPasswordString() const
+        {
+            return Password::String(fields[2]->GetValue().utf8_string());
         }
 
-        inline void SetIFPathValue(const wxString& newValue) noexcept {
-            fields[0]->ChangeValue(newValue);
+        void setIFPath(const File::Path& path)
+        {
+            fields[0]->ChangeValue(path.string());
         }
 
-        inline void SetOFPathValue(const wxString& newValue) noexcept {
-            fields[1]->ChangeValue(newValue);
+        void setOFPath(const File::Path& path)
+        {
+            fields[1]->ChangeValue(path.string());
         }
 
-        inline void DisableCancelButton() noexcept {
-            buttons[4]->Disable();
-        }
-
-        void DisableButtons() noexcept;
-        void DisableFields() noexcept;
-
-        inline void DisableProgressBar() noexcept {
+        void disableProgressBar()
+        {
             progressBar->Disable();
         }
 
-        inline void EnableCancelButton() noexcept {
-            buttons[4]->Enable();
-        }
-
-        void EnableButtons() noexcept;
-        void EnableFields() noexcept;
-
-        inline void EnableProgressBar() noexcept {
+        void enableProgressBar()
+        {
             progressBar->Enable();
         }
+
+        void disableCancelButton();
+        void disableButtons();
+        void disableFields();
+        void enableCancelButton();
+        void enableButtons();
+        void enableFields();
     };
 }
 

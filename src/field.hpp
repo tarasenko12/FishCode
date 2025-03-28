@@ -30,23 +30,25 @@
 #include <wx/window.h>
 #include <wx/windowid.h>
 
-namespace fc {
+namespace fc
+{
     class Field : public wxTextCtrl {
     public:
         Field(wxWindow* parent);
         Field(
             wxWindow* parent,
-            const wxWindowID id,
+            wxWindowID id,
             const wxString& value,
             const wxPoint& position,
             const wxSize& size,
-            const long style
+            long style
         );
-        Field(const Field& otherField) = delete;
-        Field(Field&& otherField) noexcept = delete;
 
-        Field& operator=(const Field& otherField) = delete;
-        Field& operator=(Field&& otherField) noexcept = delete;
+        Field(const Field& field) = delete;
+        Field(Field&& field) noexcept = delete;
+
+        Field& operator =(const Field& field) = delete;
+        Field& operator =(Field&& field) noexcept = delete;
 
         virtual ~Field() noexcept override = default;
     };
@@ -54,13 +56,14 @@ namespace fc {
     class PasswordField : public Field {
     public:
         PasswordField(wxWindow* parent);
-        PasswordField(const PasswordField& otherPasswordField) = delete;
-        PasswordField(PasswordField&& otherPasswordField) noexcept = delete;
 
-        PasswordField& operator=(const PasswordField& otherPasswordField) = delete;
-        PasswordField& operator=(PasswordField&& otherPasswordField) noexcept = delete;
+        PasswordField(const PasswordField& field) = delete;
+        PasswordField(PasswordField&& field) noexcept = delete;
 
-        ~PasswordField() noexcept override = default;
+        PasswordField& operator =(const PasswordField& field) = delete;
+        PasswordField& operator =(PasswordField&& field) noexcept = delete;
+
+        virtual ~PasswordField() noexcept override = default;
     };
 }
 

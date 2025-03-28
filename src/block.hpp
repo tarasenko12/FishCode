@@ -20,49 +20,75 @@
 #ifndef FISHCODE_BLOCK_HPP
 #define FISHCODE_BLOCK_HPP
 
-#include <array>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
+#include <vector>
+#include "key.hpp"
 
-namespace fc {
-    class Key;
-
+namespace fc
+{
     class Block {
     public:
-        static constexpr const std::size_t SIZE = 16;
+        using Byte = Key::Byte;
+        using Vector = std::vector<Byte>;
+        using Iterator = std::vector<Byte>::iterator;
+        using ConstIterator = std::vector<Byte>::const_iterator;
 
+        static constexpr unsigned MIN_SIZE = 1;
+        static constexpr unsigned MAX_SIZE = 16;
+    private:
+        Vector bytes;
+    public:
         Block();
-        Block(std::array<std::uint8_t, SIZE>&& newBytes, const std::size_t newRealSize) noexcept;
-        Block(const Block& otherBlock) = default;
-        Block(Block&& otherBlock) noexcept = default;
+
+        Block(const Block& block) = default;
+        Block(Block&& block) noexcept = default;
 
         virtual ~Block() noexcept = default;
 
-        Block& operator=(const Block& otherBlock) = default;
-        Block& operator=(Block&& otherBlock) noexcept = default;
+        Block& operator =(const Block& block) = default;
+        Block& operator =(Block&& block) noexcept = default;
 
-        inline std::array<std::uint8_t, SIZE> GetBytes() const {
-            return bytes;
+        Byte& operator [](unsigned index) noexcept
+        {
+            return bytes[index];
         }
 
-        inline std::size_t GetRealSize() const noexcept {
-            return realSize;
+        const Byte& operator [](unsigned index) const noexcept
+        {
+            return bytes[index];
         }
 
-        void Decrypt(const Key& key);
-        void Encrypt(const Key& key);
-    protected:
-        inline void SetBytes(std::array<uint8_t, SIZE>&& newBytes) noexcept {
-            bytes = std::move(newBytes);
+        Iterator begin()
+        {
+            return bytes.begin();
         }
 
-        inline void SetRealSize(const std::size_t newRealSize) noexcept {
-            realSize = newRealSize;
+        Iterator end()
+        {
+            return bytes.end();
         }
-    private:
-        std::array<std::uint8_t, SIZE> bytes;
-        std::size_t realSize;
+
+        ConstIterator begin() const
+        {
+            return bytes.begin();
+        }
+
+        ConstIterator end() const
+        {
+            return bytes.end();
+        }
+
+        void push(Byte byte)
+        {
+            bytes.push_back(byte);
+        }
+
+        void pop()
+        {
+            bytes.pop_back();
+        }
+
+        void decrypt(const Key& key);
+        void encrypt(const Key& key);
     };
 }
 

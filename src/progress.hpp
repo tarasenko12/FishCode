@@ -28,17 +28,19 @@
 #include <wx/gauge.h>
 #include <wx/window.h>
 
-namespace fc {
+namespace fc
+{
     class ProgressBar : public wxGauge {
     public:
         ProgressBar(wxWindow* parent);
-        ProgressBar(const ProgressBar& otherProgressBar) = delete;
-        ProgressBar(ProgressBar&& otherProgressBar) noexcept = delete;
 
-        ProgressBar& operator=(const ProgressBar& otherProgressBar) = delete;
-        ProgressBar& operator=(ProgressBar&& otherProgressBar) noexcept = delete;
+        ProgressBar(const ProgressBar& bar) = delete;
+        ProgressBar(ProgressBar&& bar) noexcept = delete;
 
-        ~ProgressBar() noexcept override = default;
+        ProgressBar& operator =(const ProgressBar& bar) = delete;
+        ProgressBar& operator =(ProgressBar&& bar) noexcept = delete;
+
+        virtual ~ProgressBar() noexcept override = default;
     };
 }
 

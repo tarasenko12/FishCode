@@ -17,34 +17,21 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <array>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
 #include "block.hpp"
 #include "key.hpp"
 
-fc::Block::Block() {
-    // Initialize block bytes with zeros.
-    bytes.fill(0);
-
-    // Now it is empty block.
-    realSize = 0;
+fc::Block::Block()
+{
+    // Allocate memory to store block with maximal size.
+    bytes.reserve(MAX_SIZE);
 }
 
-fc::Block::Block(std::array<std::uint8_t, fc::Block::SIZE>&& newBytes, const std::size_t newRealSize) noexcept {
-    // Initialize block bytes.
-    bytes = std::move(newBytes);
-
-    // Store real size of the block.
-    realSize = newRealSize;
-}
-
-void fc::Block::Encrypt(const fc::Key& key) {
+void fc::Block::encrypt(const fc::Key& key)
+{
     // Encrypt block within 15 rounds.
     for (int round = 0; round < 15; round++) {
         // Step 1: swap bytes.
-        for (std::size_t index = 1, counter = 0, pairs = realSize / 2; counter < pairs; index += 2, counter++) {
+        for (unsigned index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
             // Copy 'index - 1 byte' to the temporary storage.
             const auto temp = bytes[index - 1];
 
@@ -56,28 +43,29 @@ void fc::Block::Encrypt(const fc::Key& key) {
         }
 
         // Step 2: get round key.
-        const auto roundKey = key.GetRoundKey(round);
+        const auto roundKey = key.getRoundKey(round);
 
         // Step 3: xor key.
-        for (std::size_t index = 0; index < realSize; index++) {
-            bytes[index] ^= roundKey.bytes[index];
+        for (unsigned index = 0; index < bytes.size(); index++) {
+            bytes[index] ^= roundKey[index];
         }
     }
 }
 
-void fc::Block::Decrypt(const fc::Key& key) {
+void fc::Block::decrypt(const fc::Key& key)
+{
     // Decrypt block within 15 rounds.
     for (int round = 14; round >= 0; round--) {
         // Step 1: get round key.
-        const auto roundKey = key.GetRoundKey(round);
+        const auto roundKey = key.getRoundKey(round);
 
         // Step 2: xor key.
-        for (std::size_t index = 0; index < realSize; index++) {
-            bytes[index] ^= roundKey.bytes[index];
+        for (unsigned index = 0; index < bytes.size(); index++) {
+            bytes[index] ^= roundKey[index];
         }
 
         // Step 3: swap bytes.
-        for (std::size_t index = 1, counter = 0, pairs = realSize / 2; counter < pairs; index += 2, counter++) {
+        for (unsigned index = 1, counter = 0, pairs = bytes.size() / 2; counter < pairs; index += 2, counter++) {
             // Copy 'index - 1 byte' to the temporary storage.
             const auto temp = bytes[index - 1];
 

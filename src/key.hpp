@@ -22,25 +22,67 @@
 
 #include <array>
 #include <cstddef>
-#include <cstdint>
-#include "block.hpp"
 
-namespace fc {
-    class Key : public Block {
+namespace fc
+{
+    class Key {
+    public:
+        using Byte = std::byte;
+        using Array = std::array<Byte, 16>;
+        using Iterator = std::array<Byte, 16>::iterator;
+        using ConstIterator = std::array<Byte, 16>::const_iterator;
+
+        static constexpr unsigned SIZE = 16;
+        static constexpr unsigned BYTE_MAX = 0xff;
+    private:
+        Array bytes;
     public:
         Key() = default;
-        Key(std::array<std::uint8_t, SIZE>&& newBytes) noexcept;
-        Key(const Key& otherKey) = default;
-        Key(Key&& otherKey) noexcept = default;
 
-        virtual ~Key() noexcept override = default;
+        Key(const Key& key) = default;
+        Key(Key&& key) noexcept = default;
 
-        Key& operator=(const Key& otherKey) = default;
-        Key& operator=(Key&& otherKey) noexcept = default;
+        virtual ~Key() noexcept = default;
 
-        static Key Generate();
+        Key& operator =(const Key& key) = default;
+        Key& operator =(Key&& key) noexcept = default;
 
-        Key GetRoundKey(const int round) const;
+        static Key generate();
+
+        Byte& operator [](unsigned index) noexcept
+        {
+            return bytes[index];
+        }
+
+        const Byte& operator [](unsigned index) const noexcept
+        {
+            return bytes[index];
+        }
+
+        Iterator begin()
+        {
+            return bytes.begin();
+        }
+
+        Iterator end()
+        {
+            return bytes.end();
+        }
+
+        ConstIterator begin() const
+        {
+            return bytes.begin();
+        }
+
+        ConstIterator end() const
+        {
+            return bytes.end();
+        }
+
+        Key getRoundKey(int round) const;
+
+        void decrypt(const Key& key);
+        void encrypt(const Key& key);
     };
 }
 

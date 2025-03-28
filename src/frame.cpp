@@ -22,8 +22,8 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
+#include <chrono>
 #include <exception>
-#include <filesystem>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -35,35 +35,36 @@
 #include <wx/menu.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
-#include <wx/timer.h>
-#include "error.hpp"
+#include "errors.hpp"
 #include "events.hpp"
+#include "file.hpp"
 #include "frame.hpp"
 #include "progress.hpp"
 #include "strings.hpp"
 #include "task.hpp"
 
 fc::Frame::Frame()
-: wxFrame(nullptr, fc::events::ID_FRAME, STR_NAME0) {
+: wxFrame(nullptr, fc::events::ID_FRAME, strings::NAME0)
+{
     // Create and configure new menu bar for the frame.
     auto menuBar = new wxMenuBar();
     auto menuMore = new wxMenu();
-    menuMore->Append(wxID_ABOUT, STR_NAME2, STR_PROMPT0);
-    menuMore->Append(wxID_HELP, STR_NAME3, STR_PROMPT1);
-    menuBar->Append(menuMore, STR_NAME1);
+    menuMore->Append(wxID_ABOUT, strings::NAME2, strings::PROMPT0);
+    menuMore->Append(wxID_HELP, strings::NAME3, strings::PROMPT1);
+    menuBar->Append(menuMore, strings::NAME1);
 
     // Connect menu bar to the frame.
     SetMenuBar(menuBar);
 
     // Configure menu bar event handlers.
-    Bind(wxEVT_MENU, &fc::Frame::OnAbout, this, wxID_ABOUT);
-    Bind(wxEVT_MENU, &fc::Frame::OnHelp, this, wxID_HELP);
+    Bind(wxEVT_MENU, &fc::Frame::onAbout, this, wxID_ABOUT);
+    Bind(wxEVT_MENU, &fc::Frame::onHelp, this, wxID_HELP);
 
     // Create and set new status bar for the frame.
     SetStatusBar(CreateStatusBar());
 
     // Set the default status text.
-    SetStatusText(STR_STATUS0);
+    SetStatusText(strings::STATUS0);
 
     // Initialize new sizer (box) for the main window.
     auto boxSizer = new wxBoxSizer(wxVERTICAL);
@@ -102,9 +103,9 @@ fc::Frame::Frame()
     fields[1]->SetMinSize(fieldSize);
     fields[2]->SetMaxLength(Password::SIZE);
     fields[2]->SetMinSize(fieldSize);
-    labels[0] = new Label(this, STR_LABEL0);
-    labels[1] = new Label(this, STR_LABEL1);
-    labels[2] = new Label(this, STR_LABEL4);
+    labels[0] = new Label(this, strings::LABEL0);
+    labels[1] = new Label(this, strings::LABEL1);
+    labels[2] = new Label(this, strings::LABEL4);
     gridSizers[0]->Add(labels[0], gridLabelSizerFlags);
     gridSizers[0]->Add(fields[0], gridSizerFlags);
     gridSizers[1]->Add(labels[1], gridLabelSizerFlags);
@@ -113,11 +114,11 @@ fc::Frame::Frame()
     gridSizers[2]->Add(fields[2], gridSizerFlags);
 
     // Create buttons.
-    buttons[0] = new Button(this, events::ID_CHOOSE, STR_LABEL2);
-    buttons[1] = new Button(this, events::ID_SET, STR_LABEL3);
-    buttons[2] = new Button(this, events::ID_ENCRYPT, STR_LABEL5);
-    buttons[3] = new Button(this, events::ID_DECRYPT, STR_LABEL6);
-    buttons[4] = new Button(this, events::ID_CANCEL, STR_LABEL7);
+    buttons[0] = new Button(this, events::ID_CHOOSE, strings::LABEL2);
+    buttons[1] = new Button(this, events::ID_SET, strings::LABEL3);
+    buttons[2] = new Button(this, events::ID_ENCRYPT, strings::LABEL5);
+    buttons[3] = new Button(this, events::ID_DECRYPT, strings::LABEL6);
+    buttons[4] = new Button(this, events::ID_CANCEL, strings::LABEL7);
 
     // Disable "Cancel" button for now.
     buttons[4]->Disable();
@@ -151,51 +152,50 @@ fc::Frame::Frame()
     boxSizer->Add(buttons[4], boxSizerFlags);
 
     // Set up button event handlers.
-    buttons[0]->Bind(wxEVT_BUTTON, &fc::Frame::OnChoose, this, events::ID_CHOOSE);
-    buttons[1]->Bind(wxEVT_BUTTON, &fc::Frame::OnSet, this, events::ID_SET);
-    buttons[2]->Bind(wxEVT_BUTTON, &fc::Frame::OnEncrypt, this, events::ID_ENCRYPT);
-    buttons[3]->Bind(wxEVT_BUTTON, &fc::Frame::OnDecrypt, this, events::ID_DECRYPT);
-    buttons[4]->Bind(wxEVT_BUTTON, &fc::Frame::OnCancel, this, events::ID_CANCEL);
+    buttons[0]->Bind(wxEVT_BUTTON, &fc::Frame::onChoose, this, events::ID_CHOOSE);
+    buttons[1]->Bind(wxEVT_BUTTON, &fc::Frame::onSet, this, events::ID_SET);
+    buttons[2]->Bind(wxEVT_BUTTON, &fc::Frame::onEncrypt, this, events::ID_ENCRYPT);
+    buttons[3]->Bind(wxEVT_BUTTON, &fc::Frame::onDecrypt, this, events::ID_DECRYPT);
+    buttons[4]->Bind(wxEVT_BUTTON, &fc::Frame::onCancel, this, events::ID_CANCEL);
 
     // Connect main window (frame) with its sizer.
     SetSizerAndFit(boxSizer);
 
-    // Create and configure timer.
-    readyTimer = std::make_unique<wxTimer>(this, events::ID_READY);
-
-    // Configure timer event handler.
-    Bind(wxEVT_TIMER, &fc::Frame::OnReadyTimer, this, events::ID_READY);
-
     // Set up status update handlers.
-    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_FRAME);
-    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_FRAME);
+    Bind(events::EVT_UPDATE_DONE, &fc::Frame::onDone, this, events::ID_FRAME);
+    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::onProgressUpdate, this, events::ID_FRAME);
 
     // Configure worker thread exception handler.
-    Bind(events::EVT_TASK_EXCEPTION, &fc::Frame::OnTaskException, this, events::ID_FRAME);
+    Bind(events::EVT_TASK_EXCEPTION, &fc::Frame::onTaskException, this, events::ID_FRAME);
+
+    // Configure timer event handler.
+    Bind(events::EVT_READY_EVENT, &fc::Frame::onReady, this, events::ID_FRAME);
 
     // Configure frame closing handler.
-    Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::OnClose, this, events::ID_FRAME);
+    Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::onClose, this, events::ID_FRAME);
 }
 
-void fc::Frame::OnAbout(wxCommandEvent& event) {
+void fc::Frame::onAbout([[maybe_unused]] wxCommandEvent& event)
+{
     // Configure the about dialog.
-    wxAboutDialogInfo aboutDialogInfo;
-    aboutDialogInfo.SetName(STR_NAME0);
-    aboutDialogInfo.SetVersion(STR_VERSION);
-    aboutDialogInfo.SetDescription(STR_DESCRYPTION);
-    aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
-    aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
+    wxAboutDialogInfo aboutInfo;
+    aboutInfo.SetName(strings::NAME0);
+    aboutInfo.SetVersion(strings::VERSION);
+    aboutInfo.SetDescription(strings::DESCRYPTION);
+    aboutInfo.SetCopyright(strings::COPYRIGHT);
+    aboutInfo.AddDeveloper(strings::DEVELOPER);
 
     // Show about box.
-    wxAboutBox(aboutDialogInfo, this);
+    wxAboutBox(aboutInfo, this);
 }
 
-void fc::Frame::OnCancel(wxCommandEvent& event) {
+void fc::Frame::onCancel([[maybe_unused]] wxCommandEvent& event)
+{
     // Disable "Cancel" button.
-    DisableCancelButton();
+    disableCancelButton();
 
-    // Enable task abortion.
-    taskShouldCancel = true;
+    // Set task abortion flag.
+    abortTask = true;
 
     // Wait for the task termination (if there is a task).
     if (taskThread) {
@@ -204,43 +204,76 @@ void fc::Frame::OnCancel(wxCommandEvent& event) {
         }
     }
 
-    // Disable task abortion.
-    taskShouldCancel = false;
+    // Unset task abortion flag (already aborted).
+    abortTask = false;
 
     // Set new status in the status bar.
-    SetStatusText(STR_STATUS2);
+    SetStatusText(strings::STATUS2);
 
-    // Start timer to the new status.
-    readyTimer->StartOnce(3000);
+    // Join timer thread for replacing.
+    if (timerThread) {
+        if (timerThread->joinable()) {
+            timerThread->join();
+        }
+    }
+
+    // Start timer to the next status.
+    timerThread = std::make_unique<std::thread>([this]() {
+        using namespace std::chrono_literals;
+
+        // Sleep for the specified time.
+        std::this_thread::sleep_for(500ms);
+
+        // Send an event about timer end.
+        wxQueueEvent(this, events::ReadyEvent(events::ID_FRAME).Clone());
+    });
 }
 
-void fc::Frame::OnChoose(wxCommandEvent& event) {
+void fc::Frame::onChoose([[maybe_unused]] wxCommandEvent& event)
+{
+    // Use "global" home directory as default path.
+    wxString defaultPath = "/home";
+
+    // Try to use user's home as default file selector path.
+    if (const auto homePath = std::getenv(strings::PATTERN0)) {
+        // Use user's home directory.
+        defaultPath = homePath;
+    }
+
     // Open file selector.
-    const auto filePath = wxFileSelector(
-        STR_CAPTION1,
-        std::getenv(STR_PATTERN0),
+    const auto filePath = File::Path(wxFileSelector(
+        strings::CAPTION1,
+        defaultPath,
         wxEmptyString,
         wxEmptyString,
         wxFileSelectorDefaultWildcardStr,
         wxFD_OPEN,
         this
-    );
+    ).utf8_string());
 
     // Check if user has chosen the file.
     if (!filePath.empty()) {
         // Insert file path to the input field.
-        SetIFPathValue(filePath);
+        setIFPath(filePath);
     }
 }
 
-void fc::Frame::OnClose(wxCloseEvent& event) {
+void fc::Frame::onClose([[maybe_unused]] wxCloseEvent& event)
+{
     // Abort the task (if it is running).
-    taskShouldCancel = true;
+    abortTask = true;
 
     // Wait for the task termination (if there is a task).
     if (taskThread) {
         if (taskThread->joinable()) {
             taskThread->join();
+        }
+    }
+
+    // Wait for the timer end (if there is a timer).
+    if (timerThread) {
+        if (timerThread->joinable()) {
+            timerThread->join();
         }
     }
 
@@ -248,54 +281,46 @@ void fc::Frame::OnClose(wxCloseEvent& event) {
     Destroy();
 }
 
-void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
+void fc::Frame::onDecrypt([[maybe_unused]] wxCommandEvent& event) try {
     // Set frame to the "processing" mode.
-    DisableButtons();
-    DisableFields();
-    EnableCancelButton();
-    EnableProgressBar();
+    disableButtons();
+    disableFields();
+    enableCancelButton();
+    enableProgressBar();
 
     // Display new status in the status bar.
-    SetStatusText(STR_STATUS4);
+    SetStatusText(strings::STATUS4);
 
     // Get pathes to input and output files.
-    const auto ifPath = std::filesystem::path(GetIFPathValue().utf8_string());
-    const auto ofPath = std::filesystem::path(GetOFPathValue().utf8_string());
+    const auto ifPath = getIFPath();
+    const auto ofPath = getOFPath();
 
-    // Get user password (as string).
-    const auto password = GetPasswordValue().utf8_string();
-
-    // Check user data.
-    CheckFileIO(ifPath, ofPath);
-    CheckInputFile(ifPath, true);
-    CheckOutputFile(ofPath);
-    CheckPassword(password);
+    // Check file I/O configuration.
+    checkFileIO(ifPath, ofPath);
 
     // Allocate memory for the task data.
-    auto data = std::make_unique<TaskData>();
+    auto task = std::make_unique<Task>();
 
-    // Open the input file.
-    data->SetInputFile(ifPath);
-
-    // Create an output file.
-    data->SetOutputFile(ofPath);
-
-    // Store user password.
-    data->SetPassword(password);
+    // Set up task data.
+    task->setInputFile(File(ifPath, File::Type::input, true));
+    task->setOutputFile(File(ofPath, File::Type::output));
+    task->setPassword(Password(getPasswordString()));
 
     // Create new thread for the decryption task.
-    taskThread = std::make_unique<std::thread>(TaskDecrypt, this, std::move(data));
-} catch (const std::exception& ex) {
+    taskThread = std::make_unique<std::thread>(decrypt, this, std::move(task));
+}
+catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
-    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+    wxMessageBox(ex.what(), strings::CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
 }
 
-void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
+void fc::Frame::onDone([[maybe_unused]] fc::events::DoneEvent& event)
+{
     // Disable "Cancel" button.
-    DisableCancelButton();
+    disableCancelButton();
 
     // Join task thread to replace it in the future.
     if (taskThread) {
@@ -308,66 +333,74 @@ void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
     progressBar->SetValue(100);
 
     // Set new status in the status bar.
-    SetStatusText(STR_STATUS1);
+    SetStatusText(strings::STATUS1);
 
     // Refresh the frame.
     Refresh();
 
-    // Start timer to the new status.
-    readyTimer->StartOnce(3000);
+    // Join timer thread for replacing.
+    if (timerThread) {
+        if (timerThread->joinable()) {
+            timerThread->join();
+        }
+    }
+
+    // Start timer to the next status.
+    timerThread = std::make_unique<std::thread>([this]() {
+        using namespace std::chrono_literals;
+
+        // Sleep for the specified time.
+        std::this_thread::sleep_for(3s);
+
+        // Send an event about timer end.
+        wxQueueEvent(this, events::ReadyEvent(events::ID_FRAME).Clone());
+    });
 }
 
-void fc::Frame::OnEncrypt(wxCommandEvent& event) try {
+void fc::Frame::onEncrypt([[maybe_unused]] wxCommandEvent& event) try {
     // Set frame to the "processing" mode.
-    DisableButtons();
-    DisableFields();
-    EnableCancelButton();
-    EnableProgressBar();
+    disableButtons();
+    disableFields();
+    enableCancelButton();
+    enableProgressBar();
 
     // Display new status in the status bar.
-    SetStatusText(STR_STATUS3);
+    SetStatusText(strings::STATUS3);
 
     // Get pathes to input and output files.
-    const auto ifPath = std::filesystem::path(GetIFPathValue().utf8_string());
-    const auto ofPath = std::filesystem::path(GetOFPathValue().utf8_string());
+    const auto ifPath = getIFPath();
+    const auto ofPath = getOFPath();
 
-    // Get user password (as string).
-    const auto password = GetPasswordValue().utf8_string();
-
-    // Check user data.
-    CheckFileIO(ifPath, ofPath);
-    CheckInputFile(ifPath, false);
-    CheckOutputFile(ofPath);
-    CheckPassword(password);
+    // Check file I/O configuration.
+    checkFileIO(ifPath, ofPath);
 
     // Allocate memory for the task data.
-    auto data = std::make_unique<TaskData>();
+    auto task = std::make_unique<Task>();
 
-    // Open the input file.
-    data->SetInputFile(ifPath);
-
-    // Create an output file.
-    data->SetOutputFile(ofPath);
-
-    // Store user password.
-    data->SetPassword(password);
+    // Set up task data.
+    task->setInputFile(File(ifPath, File::Type::input));
+    task->setOutputFile(File(ofPath, File::Type::output));
+    task->setPassword(Password(getPasswordString()));
 
     // Create new thread for the encryption task.
-    taskThread = std::make_unique<std::thread>(TaskEncrypt, this, std::move(data));
-} catch (const std::exception& ex) {
+    taskThread = std::make_unique<std::thread>(encrypt, this, std::move(task));
+}
+catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
-    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+    wxMessageBox(ex.what(), strings::CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
 }
 
-void fc::Frame::OnHelp(wxCommandEvent& event) {
+void fc::Frame::onHelp([[maybe_unused]] wxCommandEvent& event)
+{
     // Display a message box with short documentation.
-    wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
+    wxMessageBox(strings::DOCUMENTATION, strings::CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
 }
 
-void fc::Frame::OnProgressUpdate(events::UpdateProgress& event) {
+void fc::Frame::onProgressUpdate(events::UpdateProgress& event)
+{
     // Set new value in the progress bar.
     progressBar->SetValue(event.GetProgress());
 
@@ -375,58 +408,82 @@ void fc::Frame::OnProgressUpdate(events::UpdateProgress& event) {
     Refresh();
 }
 
-void fc::Frame::OnReadyTimer(wxTimerEvent& event) {
+void fc::Frame::onReady([[maybe_unused]] events::ReadyEvent& event)
+{
     // Set default status in the status bar.
-    SetStatusText(STR_STATUS0);
+    SetStatusText(strings::STATUS0);
 
-    // Set progress bar to the default state (0%).
+    // Set default value in the progress bar.
     progressBar->SetValue(0);
 
-    // Set frame to the default state.
-    EnableButtons();
-    EnableFields();
-    DisableProgressBar();
+    // Enable controls.
+    enableButtons();
+    enableFields();
+
+    // Disable progress bar and "Cancel" button.
+    disableProgressBar();
+    disableCancelButton();
 }
 
-void fc::Frame::OnSet(wxCommandEvent& event) {
+void fc::Frame::onSet([[maybe_unused]] wxCommandEvent& event)
+{
+    // Use "global" home directory as default path.
+    wxString defaultPath = "/home";
+
+    // Try to use user's home as default file selector path.
+    if (const auto homePath = std::getenv(strings::PATTERN0)) {
+        // Use user's home directory.
+        defaultPath = homePath;
+    }
+
     // Open file selector.
-    const auto filePath = wxFileSelector(
-        STR_CAPTION2,
-        std::getenv(STR_PATTERN0),
+    const auto filePath = File::Path(wxFileSelector(
+        strings::CAPTION2,
+        defaultPath,
         wxEmptyString,
         wxEmptyString,
         wxFileSelectorDefaultWildcardStr,
         wxFD_SAVE,
         this
-    );
+    ).utf8_string());
 
     // Check if user has set the file.
     if (!filePath.empty()) {
-        // Insert file path to the input field.
-        SetOFPathValue(filePath);
+        // Insert file path to the output field.
+        setOFPath(filePath);
     }
 }
 
-void fc::Frame::OnTaskException(events::TaskException& event) {
+void fc::Frame::onTaskException(events::TaskException& event) {
     // Display GUI error message.
-    wxMessageBox(event.What(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+    wxMessageBox(event.what(), strings::CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
 }
 
-void fc::Frame::DisableButtons() noexcept {
+void fc::Frame::disableCancelButton()
+{
+    // Find "Cancel" button in the collection.
+    for (auto button : buttons) {
+        if (button->GetLabelText() == strings::LABEL7) {
+            // Disable it.
+            button->Disable();
+        }
+    }
+}
+
+void fc::Frame::disableButtons()
+{
     // Disable all buttons in the collection (except "Cancel" button).
     for (auto button : buttons) {
         // Check if it is not a "Cancel" button.
-        if (button == buttons[4]) {
-            // Skip.
-            continue;
+        if (button->GetLabelText() != strings::LABEL7) {
+            // Disable this button.
+            button->Disable();
         }
-
-        // Disable this button.
-        button->Disable();
     }
 }
 
-void fc::Frame::DisableFields() noexcept {
+void fc::Frame::disableFields()
+{
     // Disable all input fields.
     for (auto field : fields) {
         // Disable this field.
@@ -434,21 +491,31 @@ void fc::Frame::DisableFields() noexcept {
     }
 }
 
-void fc::Frame::EnableButtons() noexcept {
-    // Enable all buttons in the collection (except "Cancel" button).
+void fc::Frame::enableCancelButton()
+{
+    // Find "Cancel" button in the collection.
     for (auto button : buttons) {
-        // Check if it is not a "Cancel" button.
-        if (button == buttons[4]) {
-            // Skip.
-            continue;
+        if (button->GetLabelText() == strings::LABEL7) {
+            // Enable it.
+            button->Enable();
         }
-
-        // Enable this button.
-        button->Enable();
     }
 }
 
-void fc::Frame::EnableFields() noexcept {
+void fc::Frame::enableButtons()
+{
+    // Enable all buttons in the collection (except "Cancel" button).
+    for (auto button : buttons) {
+        // Check if it is not a "Cancel" button.
+        if (button->GetLabelText() != strings::LABEL7) {
+            // Disable this button.
+            button->Enable();
+        }
+    }
+}
+
+void fc::Frame::enableFields()
+{
     // Enable all input fields.
     for (auto field : fields) {
         // Enable this field.

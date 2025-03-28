@@ -41,12 +41,13 @@ bool fc::FishCode::OnInit() try {
 
     // Start the application.
     return true;
-} catch (const std::exception& ex) {
+}
+catch (const std::exception& ex) {
     // Print error message to the terminal.
     std::cerr << ex.what() << std::endl;
 
     // Display GUI error message (if it is possible).
-    wxMessageBox(ex.what(), STR_CAPTION3, wxOK | wxCENTRE | wxICON_ERROR);
+    wxMessageBox(ex.what(), strings::CAPTION3, wxOK | wxCENTRE | wxICON_ERROR);
 
     // Do not start the application.
     return false;

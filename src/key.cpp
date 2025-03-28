@@ -17,56 +17,98 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <array>
 #include <random>
-#include <utility>
-#include <cstddef>
-#include <cstdint>
 #include "key.hpp"
 
-fc::Key::Key(std::array<std::uint8_t, fc::Key::SIZE>&& newBytes) noexcept
-: fc::Block(std::move(newBytes), fc::Key::SIZE) {
-
-}
-
-fc::Key fc::Key::Generate() {
+fc::Key fc::Key::generate()
+{
     // Create a new random device.
     std::random_device randomDevice;
 
     // Use 32-bit 'Mersenne Twister' algorithm.
     std::mt19937 generator(randomDevice());
 
-    // Configure generator to produce numbers from 0 to UINT8_MAX.
-    std::uniform_int_distribution<unsigned int> distribute(0, UINT8_MAX);
+    // Configure generator to produce numbers from 0 to 0xff.
+    std::uniform_int_distribution<unsigned int> distribute(0, BYTE_MAX);
 
-    // Create a storage for the generated key bytes.
-    std::array<std::uint8_t, SIZE> generatedBytes;
+    // Create a storage for the key.
+    Key key;
 
     // Generate key by bytes.
-    for (std::size_t counter = 0; counter < SIZE; counter++) {
+    for (unsigned counter = 0; counter < SIZE; counter++) {
         // Produce pseudo-random number and store it.
-        generatedBytes[counter] = static_cast<std::uint8_t>(distribute(generator));
+        key[counter] = static_cast<Byte>(distribute(generator));
     }
 
     // Return generated key.
-    return Key(std::move(generatedBytes));
+    return key;
 }
 
-fc::Key fc::Key::GetRoundKey(const int round) const {
-    // Get current key bytes.
-    const auto currentBytes = GetBytes();
-
-    // Create a storage for the new key bytes.
-    std::array<std::uint8_t, SIZE> newBytes;
+fc::Key fc::Key::getRoundKey(int round) const
+{
+    // Create a storage for the round key.
+    Key key;
 
     // Calculate a 'magic' number.
-    const auto magicNumber = static_cast<std::uint8_t>(0x4D ^ round);
+    const auto magicNumber = static_cast<Byte>(0x4d) ^ static_cast<Byte>(round);
 
     // Combine key bytes and the 'magic' number.
-    for (std::size_t index = 0; index < Key::SIZE; index++) {
-        newBytes[index] = currentBytes[index] ^ magicNumber;
+    for (unsigned index = 0; index < SIZE; index++) {
+        key[index] = bytes[index] ^ magicNumber;
     }
 
     // Return new round key.
-    return Key(std::move(newBytes));
+    return key;
+}
+
+void fc::Key::encrypt(const fc::Key& key)
+{
+    // Encrypt key within 15 rounds.
+    for (int round = 0; round < 15; round++) {
+        // Step 1: swap bytes.
+        for (unsigned index = 1, counter = 0, pairs = SIZE / 2; counter < pairs; index += 2, counter++) {
+            // Copy 'index - 1 byte' to the temporary storage.
+            const auto temp = bytes[index - 1];
+
+            // Move 'index byte'.
+            bytes[index - 1] = bytes[index];
+
+            // Store 'index - 1 byte'.
+            bytes[index] = temp;
+        }
+
+        // Step 2: get round key.
+        const auto roundKey = key.getRoundKey(round);
+
+        // Step 3: xor key.
+        for (unsigned index = 0; index < SIZE; index++) {
+            bytes[index] ^= roundKey.bytes[index];
+        }
+    }
+}
+
+void fc::Key::decrypt(const fc::Key& key)
+{
+    // Decrypt key within 15 rounds.
+    for (int round = 14; round >= 0; round--) {
+        // Step 1: get round key.
+        const auto roundKey = key.getRoundKey(round);
+
+        // Step 2: xor key.
+        for (unsigned index = 0; index < SIZE; index++) {
+            bytes[index] ^= roundKey.bytes[index];
+        }
+
+        // Step 3: swap bytes.
+        for (unsigned index = 1, counter = 0, pairs = SIZE / 2; counter < pairs; index += 2, counter++) {
+            // Copy 'index - 1 byte' to the temporary storage.
+            const auto temp = bytes[index - 1];
+
+            // Move 'index byte'.
+            bytes[index - 1] = bytes[index];
+
+            // Store 'index - 1 byte'.
+            bytes[index] = temp;
+        }
+    }
 }

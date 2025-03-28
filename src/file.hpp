@@ -22,47 +22,60 @@
 
 #include <filesystem>
 #include <fstream>
-#include <ios>
+#include <cstddef>
 #include "block.hpp"
 #include "key.hpp"
 
-namespace fc {
-    enum class FileType {
-        FT_INPUT,
-        FT_OUTPUT
-    };
-
+namespace fc
+{
     class File {
     public:
-        File();
-        File(const std::filesystem::path& newFSPath, const FileType type);
-        File(const File& anotherFile) = delete;
-        File(File&& anotherFile) noexcept = default;
+        using Path = std::filesystem::path;
+        using Stream = std::fstream;
+        using Size = std::size_t;
 
-        ~File() noexcept = default;
+        enum class Type {
+            input,
+            output
+        };
+    private:
+        Path path;
+        Size size;
+        mutable Stream stream;
+        Type type;
+        bool encrypted;
+    public:
+        File() = default;
 
-        File& operator=(const File& anotherFile) = delete;
-        File& operator=(File&& anotherFile) noexcept = default;
+        File(const Path& path, Type type, bool encrypted = false);
 
-        inline std::streamsize GetSize() const noexcept {
+        File(const File& file) = delete;
+        File(File&& file) noexcept = default;
+
+        virtual ~File() noexcept = default;
+
+        File& operator =(const File& file) = delete;
+        File& operator =(File&& file) noexcept = default;
+
+        Size getSize() const noexcept
+        {
             return size;
         }
 
-        Block ReadBlock(const std::streamsize bytesToRead);
-        Key ReadKey();
+        Block readBlock(Size blockSize = Block::MAX_SIZE) const;
+        Key readKey() const;
 
-        inline void Remove() {
+        void writeBlock(const Block& block);
+        void writeKey(const Key& key);
+
+        void remove()
+        {
             // Remove this file using filesystem path.
-            std::filesystem::remove(fsPath);
+            std::filesystem::remove(path);
         }
-
-        void WriteBlock(const Block& block);
-        void WriteKey(const Key& key);
-    private:
-        std::filesystem::path fsPath;
-        std::streamsize size;
-        std::fstream stream;
     };
+
+    void checkFileIO(const File::Path& ifPath, const File::Path& ofPath);
 }
 
 #endif // FISHCODE_FILE_HPP

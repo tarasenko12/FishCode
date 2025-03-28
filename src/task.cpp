@@ -24,141 +24,63 @@
 
 #include <atomic>
 #include <exception>
-#include <ios>
 #include <memory>
 #include <wx/event.h>
 #include "block.hpp"
+#include "file.hpp"
 #include "events.hpp"
 #include "key.hpp"
 #include "task.hpp"
 
-// Disable task abortion (default).
-std::atomic<bool> fc::taskShouldCancel(false);
+// Task abortion is disabled by default.
+std::atomic<bool> fc::abortTask(false);
 
-void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::TaskData> data) try {
+void fc::encrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) try {
     // Obtain user data.
-    auto& inputFile = data->GetInputFile();
-    auto& outputFile = data->GetOutputFile();
-    const auto& password = data->GetPassword();
+    auto& inputFile = task->getInputFile();
+    auto& outputFile = task->getOutputFile();
+    const auto& password = task->getPassword();
 
     // Calculate total number of full blocks in the input file.
-    const auto total = (inputFile.GetSize() - Key::SIZE) / Block::SIZE;
+    const auto total = inputFile.getSize() / Block::MAX_SIZE;
 
     // Calculate number of partial blocks in the input file.
-    const auto partial = (inputFile.GetSize() - Key::SIZE) % Block::SIZE;
-
-    // Read decryption (encrypted) key from the input file.
-    auto key = inputFile.ReadKey();
-
-    // Decrypt the key.
-    key.Decrypt(password);
-
-    // Calculate 1% of blocks in the input file.
-    const auto onePercent = total / 100;
-
-    // Decrypt the input file by blocks.
-    for (std::size_t current = 0; current < total; current++) {
-        // Check for task abortion.
-        if (taskShouldCancel) {
-            // Remove output file (user doesn't need it).
-            outputFile.Remove();
-
-            // Terminate the thread.
-            return;
-        }
-
-        // Read one block from the file.
-        auto block = inputFile.ReadBlock(static_cast<std::streamsize>(Block::SIZE));
-
-        // Decrypt the block.
-        block.Decrypt(key);
-
-        // Store block to the output file.
-        outputFile.WriteBlock(block);
-
-        // Calculate current percentage of task completition.
-        const int percent = (current * 100) / total;
-
-        // Check if there is a valuable progress.
-        if (onePercent > 0) {
-            if (current % onePercent == 0) {
-                // Send a message about progress update.
-                wxPostEvent(sink, events::UpdateProgress(fc::events::ID_FRAME, percent));
-            }
-        }
-    }
-
-    // Check if there is a partial block.
-    if (partial != 0 && !taskShouldCancel) {
-        // Read this block from the file.
-        auto block = inputFile.ReadBlock(static_cast<std::streamsize>(partial));
-
-        // Decrypt the block.
-        block.Decrypt(key);
-
-        // Store block to the output file.
-        outputFile.WriteBlock(block);
-    }
-
-    // Check for task abortion.
-    if (!taskShouldCancel) {
-        // Notify the main thread about task completition.
-        wxPostEvent(sink, events::UpdateDone(fc::events::ID_FRAME));
-    } else {
-        // Remove output file (user doesn't need it).
-        outputFile.Remove();
-    }
-} catch (const std::exception& ex) {
-    // Notify main thread about exception in the task thread.
-    wxPostEvent(sink, events::TaskException(events::ID_FRAME, ex));
-}
-
-void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::TaskData> data) try {
-    // Obtain user data.
-    auto& inputFile = data->GetInputFile();
-    auto& outputFile = data->GetOutputFile();
-    const auto& password = data->GetPassword();
-
-    // Calculate total number of full blocks in the input file.
-    const auto total = inputFile.GetSize() / Block::SIZE;
-
-    // Calculate number of partial blocks in the input file.
-    const auto partial = inputFile.GetSize() % Block::SIZE;
+    const auto partial = inputFile.getSize() % Block::MAX_SIZE;
 
     // Generate encryption key.
-    auto key = Key::Generate();
+    auto key = Key::generate();
 
     // Encrypt the key.
-    key.Encrypt(password);
+    key.encrypt(password);
 
-    // Write decryption (encrypted) key to the output file.
-    outputFile.WriteKey(key);
+    // write decryption (encrypted) key to the output file.
+    outputFile.writeKey(key);
 
     // Decrypt the key.
-    key.Decrypt(password);
+    key.decrypt(password);
 
     // Calculate 1% of blocks in the input file.
     const auto onePercent = total / 100;
 
     // Encrypt the input file by blocks.
-    for (std::size_t current = 0; current < total; current++) {
+    for (File::Size current = 0; current < total; current++) {
         // Check for task abortion.
-        if (taskShouldCancel) {
+        if (abortTask) {
             // Remove output file (user doesn't need it).
-            outputFile.Remove();
+            outputFile.remove();
 
             // Terminate the thread.
             return;
         }
 
-        // Read one block from the file.
-        auto block = inputFile.ReadBlock(static_cast<std::streamsize>(Block::SIZE));
+        // read one block from the file.
+        auto block = inputFile.readBlock();
 
         // Encrypt the block.
-        block.Encrypt(key);
+        block.encrypt(key);
 
         // Store block to the output file.
-        outputFile.WriteBlock(block);
+        outputFile.writeBlock(block);
 
         // Calculate current percentage of task completition.
         const int percent = (current * 100) / total;
@@ -167,32 +89,114 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::TaskData> data) try
         if (onePercent > 0) {
             if (current % onePercent == 0) {
                 // Send a message about progress update.
-                wxPostEvent(sink, events::UpdateProgress(fc::events::ID_FRAME, percent));
+                wxPostEvent(sink, events::UpdateProgress(events::ID_FRAME, percent));
             }
         }
     }
 
     // Check if there is a partial block.
-    if (partial != 0 && !taskShouldCancel) {
-        // Read this block from the file.
-        auto block = inputFile.ReadBlock(static_cast<std::streamsize>(partial));
+    if (partial != 0 && !abortTask) {
+        // read this block from the file.
+        auto block = inputFile.readBlock(partial);
 
         // Encrypt the block.
-        block.Encrypt(key);
+        block.encrypt(key);
 
         // Store block to the output file.
-        outputFile.WriteBlock(block);
+        outputFile.writeBlock(block);
     }
 
     // Check for task abortion.
-    if (!taskShouldCancel) {
+    if (!abortTask) {
         // Notify the main thread about task completition.
-        wxPostEvent(sink, events::UpdateDone(fc::events::ID_FRAME));
-    } else {
-        // Remove output file (user doesn't need it).
-        outputFile.Remove();
+        wxPostEvent(sink, events::DoneEvent(events::ID_FRAME));
     }
-} catch (const std::exception& ex) {
+    else {
+        // Remove output file (user doesn't need it).
+        outputFile.remove();
+    }
+}
+catch (const std::exception& ex) {
+    // Notify main thread about exception in the task thread.
+    wxPostEvent(sink, events::TaskException(events::ID_FRAME, ex));
+}
+
+void fc::decrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) try {
+    // Obtain user data.
+    auto& inputFile = task->getInputFile();
+    auto& outputFile = task->getOutputFile();
+    const auto& password = task->getPassword();
+
+    // Calculate total number of full blocks in the input file.
+    const auto total = (inputFile.getSize() - Key::SIZE) / Block::MAX_SIZE;
+
+    // Calculate number of partial blocks in the input file.
+    const auto partial = (inputFile.getSize() - Key::SIZE) % Block::MAX_SIZE;
+
+    // read decryption (encrypted) key from the input file.
+    auto key = inputFile.readKey();
+
+    // Decrypt the key.
+    key.decrypt(password);
+
+    // Calculate 1% of blocks in the input file.
+    const auto onePercent = total / 100;
+
+    // Decrypt the input file by blocks.
+    for (File::Size current = 0; current < total; current++) {
+        // Check for task abortion.
+        if (abortTask) {
+            // Remove output file (user doesn't need it).
+            outputFile.remove();
+
+            // Terminate the thread.
+            return;
+        }
+
+        // read one block from the file.
+        auto block = inputFile.readBlock();
+
+        // Decrypt the block.
+        block.decrypt(key);
+
+        // Store block to the output file.
+        outputFile.writeBlock(block);
+
+        // Calculate current percentage of task completition.
+        const int percent = (current * 100) / total;
+
+        // Check if there is a valuable progress.
+        if (onePercent > 0) {
+            if (current % onePercent == 0) {
+                // Send a message about progress update.
+                wxPostEvent(sink, events::UpdateProgress(events::ID_FRAME, percent));
+            }
+        }
+    }
+
+    // Check if there is a partial block.
+    if (partial != 0 && !abortTask) {
+        // read this block from the file.
+        auto block = inputFile.readBlock(partial);
+
+        // Decrypt the block.
+        block.decrypt(key);
+
+        // Store block to the output file.
+        outputFile.writeBlock(block);
+    }
+
+    // Check for task abortion.
+    if (!abortTask) {
+        // Notify the main thread about task completition.
+        wxPostEvent(sink, events::DoneEvent(events::ID_FRAME));
+    }
+    else {
+        // Remove output file (user doesn't need it).
+        outputFile.remove();
+    }
+}
+catch (const std::exception& ex) {
     // Notify main thread about exception in the task thread.
     wxPostEvent(sink, events::TaskException(events::ID_FRAME, ex));
 }

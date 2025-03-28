@@ -22,98 +22,119 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_EVENT_HPP
-#define FISHCODE_EVENT_HPP
+#ifndef FISHCODE_EVENTS_HPP
+#define FISHCODE_EVENTS_HPP
 
 #include <exception>
 #include <string>
 #include <wx/event.h>
 
-namespace fc {
-    namespace events {
-        enum ControlItemID {
-            ID_CANCEL = 1,
+namespace fc
+{
+    namespace events
+    {
+        enum {
+            ID_FRAME = 1,
+            ID_CANCEL,
             ID_CHOOSE,
             ID_DECRYPT,
             ID_ENCRYPT,
             ID_SET
         };
 
-        enum TimerID {
-            ID_READY = ID_SET + 1
-        };
-
-        enum WindowID {
-            ID_FRAME = ID_READY + 1
-        };
-
         class TaskException : public wxEvent {
+            std::string prompt;
         public:
-            TaskException(const int newID, const std::exception& ex) noexcept;
-            TaskException(const TaskException& otherTaskException) noexcept = default;
-            TaskException(TaskException&& otherTaskException) noexcept = delete;
+            TaskException(int id, const std::exception& ex) noexcept;
 
-            TaskException& operator=(const TaskException& otherTaskException) noexcept = default;
-            TaskException& operator=(TaskException&& otherTaskException) noexcept = delete;
+            TaskException(const TaskException& event) noexcept = default;
+            TaskException(TaskException&& event) noexcept = delete;
 
-            ~TaskException() noexcept override = default;
+            TaskException& operator =(const TaskException& event) noexcept = default;
+            TaskException& operator =(TaskException&& event) noexcept = delete;
 
-            inline wxEvent* Clone() const override {
+            virtual ~TaskException() noexcept override = default;
+
+            wxEvent* Clone() const override
+            {
                 return new TaskException(*this);
             }
 
-            inline const char* What() const noexcept {
+            const char* what() const noexcept
+            {
                 // Return C-style explanation string.
-                return exWhat.c_str();
+                return prompt.c_str();
             }
-        private:
-            std::string exWhat;
         };
 
         wxDECLARE_EVENT(EVT_TASK_EXCEPTION, TaskException);
 
-        class UpdateDone : public wxEvent {
+        class DoneEvent : public wxEvent {
         public:
-            UpdateDone(const int newID);
-            UpdateDone(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone(UpdateDone&& otherUpdateDone) noexcept = delete;
+            DoneEvent(int id);
 
-            UpdateDone& operator=(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone& operator=(UpdateDone&& otherUpdateDone) noexcept = delete;
+            DoneEvent(const DoneEvent& event) = default;
+            DoneEvent(DoneEvent&& event) noexcept = delete;
 
-            ~UpdateDone() noexcept override = default;
+            DoneEvent& operator =(const DoneEvent& event) = default;
+            DoneEvent& operator =(DoneEvent&& event) noexcept = delete;
 
-            inline wxEvent* Clone() const override {
-                return new UpdateDone(*this);
+            virtual ~DoneEvent() noexcept override = default;
+
+            wxEvent* Clone() const override
+            {
+                return new DoneEvent(*this);
             }
         };
 
-        wxDECLARE_EVENT(EVT_UPDATE_DONE, UpdateDone);
+        wxDECLARE_EVENT(EVT_UPDATE_DONE, DoneEvent);
 
         class UpdateProgress : public wxEvent {
+            int progress;
         public:
-            UpdateProgress(const int newID, const int newProgress);
-            UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress(UpdateProgress&& otherUpdateProgress) noexcept = delete;
+            UpdateProgress(int id, int progress);
 
-            UpdateProgress& operator=(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) noexcept = delete;
+            UpdateProgress(const UpdateProgress& event) = default;
+            UpdateProgress(UpdateProgress&& event) noexcept = delete;
 
-            ~UpdateProgress() noexcept override = default;
+            UpdateProgress& operator =(const UpdateProgress& event) = default;
+            UpdateProgress& operator =(UpdateProgress&& event) noexcept = delete;
 
-            inline wxEvent* Clone() const override {
+            virtual ~UpdateProgress() noexcept override = default;
+
+            wxEvent* Clone() const override
+            {
                 return new UpdateProgress(*this);
             }
 
-            inline int GetProgress() const noexcept {
+            int GetProgress() const noexcept
+            {
                 return progress;
             }
-        private:
-            int progress;
         };
 
         wxDECLARE_EVENT(EVT_UPDATE_PROGRESS, UpdateProgress);
+
+        class ReadyEvent : public wxEvent {
+        public:
+            ReadyEvent(int id);
+
+            ReadyEvent(const ReadyEvent& event) = default;
+            ReadyEvent(ReadyEvent&& event) noexcept = delete;
+
+            ReadyEvent& operator =(const ReadyEvent& event) = default;
+            ReadyEvent& operator =(ReadyEvent&& event) noexcept = delete;
+
+            virtual ~ReadyEvent() noexcept override = default;
+
+            wxEvent* Clone() const override
+            {
+                return new ReadyEvent(*this);
+            }
+        };
+
+        wxDECLARE_EVENT(EVT_READY_EVENT, ReadyEvent);
     }
 }
 
-#endif // FISHCODE_EVENT_HPP
+#endif // FISHCODE_EVENTS_HPP

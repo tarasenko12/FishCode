@@ -31,23 +31,26 @@
 #include "password.hpp"
 
 fc::Field::Field(wxWindow* parent)
-: wxTextCtrl(parent, wxID_ANY) {
+: wxTextCtrl(parent, wxID_ANY)
+{
 
 }
 
 fc::Field::Field(
     wxWindow* parent,
-    const wxWindowID id,
+    wxWindowID id,
     const wxString& value,
     const wxPoint& position,
     const wxSize& size,
-    const long style
-) : wxTextCtrl(parent, id, value, position, size, style) {
+    long style
+) : wxTextCtrl(parent, id, value, position, size, style)
+{
 
 }
 
 fc::PasswordField::PasswordField(wxWindow* parent)
-: Field(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD) {
+: Field(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD)
+{
     // Set up size limit for the input string.
     SetMaxLength(Password::SIZE);
 }

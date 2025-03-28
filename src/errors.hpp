@@ -17,26 +17,26 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_ERROR_HPP
-#define FISHCODE_ERROR_HPP
+#ifndef FISHCODE_ERRORS_HPP
+#define FISHCODE_ERRORS_HPP
 
 #include <exception>
-#include <string>
-#include "file.hpp"
-#include "password.hpp"
 
-namespace fc {
-    namespace error {
+namespace fc
+{
+    namespace errors
+    {
         class InvalidFileIO : public std::exception {
         public:
             InvalidFileIO() noexcept = default;
-            InvalidFileIO(const InvalidFileIO& other) = default;
-            InvalidFileIO(InvalidFileIO&& other) noexcept = default;
+
+            InvalidFileIO(const InvalidFileIO& ex) = default;
+            InvalidFileIO(InvalidFileIO&& ex) noexcept = default;
 
             ~InvalidFileIO() noexcept = default;
 
-            InvalidFileIO& operator=(const InvalidFileIO& other) = default;
-            InvalidFileIO& operator=(InvalidFileIO&& other) noexcept = default;
+            InvalidFileIO& operator =(const InvalidFileIO& ex) = default;
+            InvalidFileIO& operator =(InvalidFileIO&& ex) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -44,13 +44,13 @@ namespace fc {
         class InvalidInputFile : public std::exception {
         public:
             InvalidInputFile() noexcept = default;
-            InvalidInputFile(const InvalidInputFile& other) = default;
-            InvalidInputFile(InvalidInputFile&& other) noexcept = default;
+            InvalidInputFile(const InvalidInputFile& ex) = default;
+            InvalidInputFile(InvalidInputFile&& ex) noexcept = default;
 
             ~InvalidInputFile() noexcept = default;
 
-            InvalidInputFile& operator=(const InvalidInputFile& other) = default;
-            InvalidInputFile& operator=(InvalidInputFile&& other) noexcept = default;
+            InvalidInputFile& operator =(const InvalidInputFile& ex) = default;
+            InvalidInputFile& operator =(InvalidInputFile&& ex) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -58,13 +58,13 @@ namespace fc {
         class InvalidOutputFile : public std::exception {
         public:
             InvalidOutputFile() noexcept = default;
-            InvalidOutputFile(const InvalidOutputFile& other) = default;
-            InvalidOutputFile(InvalidOutputFile&& other) noexcept = default;
+            InvalidOutputFile(const InvalidOutputFile& ex) = default;
+            InvalidOutputFile(InvalidOutputFile&& ex) noexcept = default;
 
             ~InvalidOutputFile() noexcept = default;
 
-            InvalidOutputFile& operator=(const InvalidOutputFile& other) = default;
-            InvalidOutputFile& operator=(InvalidOutputFile&& other) noexcept = default;
+            InvalidOutputFile& operator =(const InvalidOutputFile& ex) = default;
+            InvalidOutputFile& operator =(InvalidOutputFile&& ex) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -72,22 +72,17 @@ namespace fc {
         class InvalidPassword : public std::exception {
         public:
             InvalidPassword() noexcept = default;
-            InvalidPassword(const InvalidPassword& other) = default;
-            InvalidPassword(InvalidPassword&& other) noexcept = default;
+            InvalidPassword(const InvalidPassword& ex) = default;
+            InvalidPassword(InvalidPassword&& ex) noexcept = default;
 
             ~InvalidPassword() noexcept = default;
 
-            InvalidPassword& operator=(const InvalidPassword& other) = default;
-            InvalidPassword& operator=(InvalidPassword&& other) noexcept = default;
+            InvalidPassword& operator =(const InvalidPassword& ex) = default;
+            InvalidPassword& operator =(InvalidPassword&& ex) noexcept = default;
 
             const char* what() const noexcept override;
         };
     }
-
-    void CheckFileIO(const std::filesystem::path& ifPath, const std::filesystem::path& ofPath);
-    void CheckInputFile(const std::filesystem::path& inputFilePath, const bool isEncrypted);
-    void CheckOutputFile(const std::filesystem::path& outputFilePath);
-    void CheckPassword(const std::string& passwordString);
 }
 
-#endif // FISHCODE_ERROR_HPP
+#endif // FISHCODE_ERRORS_HPP
