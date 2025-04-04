@@ -42,8 +42,8 @@ namespace fc
         Path path;
         Size size;
         mutable Stream stream;
-        Type type;
-        bool encrypted;
+        [[maybe_unused]] Type type;
+        [[maybe_unused]] bool encrypted;
     public:
         File() = default;
 
